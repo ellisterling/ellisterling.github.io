@@ -366,10 +366,10 @@ background-size: cover;
 </div>
 </div>
 <p>We can shorten the species of the penguins to just the first word, which will make it easier to catalogue them.</p>
-<div id="cell-7" class="cell" data-execution_count="3">
+<div id="cell-7" class="cell" data-execution_count="31">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>train[<span class="st">"Species"</span>] <span class="op">=</span> train[<span class="st">"Species"</span>].<span class="bu">str</span>.split().<span class="bu">str</span>.get(<span class="dv">0</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>train.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
+<div class="cell-output cell-output-display" data-execution_count="31">
 <div>
 
 
@@ -507,10 +507,10 @@ background-size: cover;
 <section id="figure-creation" class="level3">
 <h3 class="anchored" data-anchor-id="figure-creation">Figure Creation</h3>
 <p>Now that we’ve preprocessed the data a little bit, we can create a few plots to get an idea of what this data means. Below, we use seaborn to create a scatterplot and a bar plot.</p>
-<div id="cell-9" class="cell" data-execution_count="4">
+<div id="cell-9" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="fl">3.5</span>, <span class="dv">8</span>))</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>p1 <span class="op">=</span> sns.scatterplot(train, x <span class="op">=</span> <span class="st">"Flipper Length (mm)"</span>, y <span class="op">=</span> <span class="st">'Delta 13 C (o/oo)'</span>, hue <span class="op">=</span> <span class="st">"Species"</span>, style <span class="op">=</span> <span class="st">"Species"</span>, ax <span class="op">=</span> ax[<span class="dv">0</span>], legend<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>p1 <span class="op">=</span> sns.scatterplot(train, x <span class="op">=</span> <span class="st">"Flipper Length (mm)"</span>, y <span class="op">=</span> <span class="st">'Delta 13 C (o/oo)'</span>, hue <span class="op">=</span> <span class="st">"Species"</span>, style <span class="op">=</span> <span class="st">"Species"</span>, ax <span class="op">=</span> ax[<span class="dv">0</span>])</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>p2 <span class="op">=</span> sns.barplot(train, x <span class="op">=</span> <span class="st">"Island"</span>, y <span class="op">=</span> <span class="st">"Body Mass (g)"</span>, hue <span class="op">=</span> <span class="st">'Species'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -830,7 +830,7 @@ background-size: cover;
 </div>
 </div>
 <p>Great! We have 100% accuracy on the testing data. Now for some more plotting… ### Plotting the Category Regions Using Matplotlib, we can display the categories on a plot as colored regions. This allows us to visualize how the test points are categorized, and we can get a visual representation of the accuracy of the model.</p>
-<div id="cell-23" class="cell" data-execution_count="10">
+<div id="cell-23" class="cell" data-execution_count="29">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -879,7 +879,7 @@ background-size: cover;
 <span id="cb11-46"><a href="#cb11-46" aria-hidden="true" tabindex="-1"></a>            title <span class="op">=</span> qual_features[i])</span>
 <span id="cb11-47"><a href="#cb11-47" aria-hidden="true" tabindex="-1"></a>      </span>
 <span id="cb11-48"><a href="#cb11-48" aria-hidden="true" tabindex="-1"></a>      patches <span class="op">=</span> []</span>
-<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> color, spec <span class="kw">in</span> <span class="bu">zip</span>([<span class="st">"red"</span>, <span class="st">"green"</span>, <span class="st">"blue"</span>], [<span class="st">"Adelie"</span>, <span class="st">"Chinstrap"</span>, <span class="st">"Gentoo"</span>]):</span>
+<span id="cb11-49"><a href="#cb11-49" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> color, spec <span class="kw">in</span> <span class="bu">zip</span>([<span class="st">"red"</span>, <span class="st">"green"</span>, <span class="st">"blue"</span>], [<span class="st">"Gentoo"</span>, <span class="st">"Chinstrap"</span>, <span class="st">"Adelie"</span>]):</span>
 <span id="cb11-50"><a href="#cb11-50" aria-hidden="true" tabindex="-1"></a>        patches.append(Patch(color <span class="op">=</span> color, label <span class="op">=</span> spec))</span>
 <span id="cb11-51"><a href="#cb11-51" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-52"><a href="#cb11-52" aria-hidden="true" tabindex="-1"></a>      plt.legend(title <span class="op">=</span> <span class="st">"Species"</span>, handles <span class="op">=</span> patches, loc <span class="op">=</span> <span class="st">"best"</span>)</span>
@@ -887,7 +887,7 @@ background-size: cover;
 <span id="cb11-54"><a href="#cb11-54" aria-hidden="true" tabindex="-1"></a>      plt.tight_layout()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We are going to look at both the training data and the testing data, split up by the qualitative factor (the islands).</p>
-<div id="cell-25" class="cell" data-execution_count="11">
+<div id="cell-25" class="cell" data-execution_count="30">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>plot_regions(best_lr, x_train[best_attrs], y_train)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>plot_regions(best_lr, x_test[best_attrs], y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -944,10 +944,11 @@ There were 0 Gentoo penguin(s) who were classified as Chinstrap.
 There were 26 Gentoo penguin(s) who were classified as Gentoo.</code></pre>
 </div>
 </div>
+<p>Since the model was 100% correct on the testing data, it is hard to comment on where it could go wrong. However, I predict that false positives for Adelie could occur, since Adelie penguins are found on all three islands. Additionally, the training data included a few penguins who were Chinstraps that were on the border of the Chinstrap and Adelie classifications in the above regions plot.</p>
 </section>
 <section id="discussion" class="level3">
 <h3 class="anchored" data-anchor-id="discussion">Discussion</h3>
-<p>[insert discussion here]</p>
+<p>In this blog post, we used a Logistic Regression model to classify penguins from the Palmer Penguins dataset. We found that the most important features were the island they were observed on and their culmen dimensions. In general, the model was successful in categorizing the section of the data that we put aside for testing, and it performed well for being trained on only a few features. I am curious if adding more features would improve the accuracy of the model, or if it would introduce overfitting to the model and would become too specific.</p>
 
 
 </section>
