@@ -213,12 +213,13 @@ background-size: cover;
 
 
 <section id="abstract" class="level3">
-<h3 class="anchored" data-anchor-id="abstract">Abstract</h3>
+<h3 class="anchored" data-anchor-id="abstract"><strong>Abstract</strong></h3>
+<p>In this blog post, we will walk through the process of training a linear regression model, creating a scoring function, and finding an optimal threshold for a scoring and classification problem. The dataset we are working with is one with data about prospective loan borrowers from a bank. It includes various characteristics of each person and the loan they are requesting. We will use this data to determine a threshold and scoring function to determine whether or not, if given the loan, the borrower is likely to default (or, in laymans terms, violate the terms of the loan by not paying/causing the bank to lose money). We will use the scikit-learn library again for this blog post</p>
 </section>
 <section id="part-a-grab-the-data" class="level3">
-<h3 class="anchored" data-anchor-id="part-a-grab-the-data">Part A: Grab the Data</h3>
+<h3 class="anchored" data-anchor-id="part-a-grab-the-data"><strong>Part A: Grab the Data</strong></h3>
 <p>To begin, let’s import the data:</p>
-<div id="cell-4" class="cell" data-execution_count="4">
+<div id="cell-4" class="cell" data-execution_count="208">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> matplotlib <span class="im">import</span> pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
@@ -227,21 +228,21 @@ background-size: cover;
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>df_train <span class="op">=</span> pd.read_csv(url)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>We can take a look at the columns so that we know what attributes we are working with.</p>
-<div id="cell-6" class="cell" data-execution_count="5">
+<div id="cell-6" class="cell" data-execution_count="267">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>df_train.columns</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
+<div class="cell-output cell-output-display" data-execution_count="267">
 <pre><code>Index(['person_age', 'person_income', 'person_home_ownership',
        'person_emp_length', 'loan_intent', 'loan_grade', 'loan_amnt',
        'loan_int_rate', 'loan_status', 'loan_percent_income',
-       'cb_person_default_on_file', 'cb_person_cred_hist_length'],
+       'cb_person_default_on_file', 'cb_person_cred_hist_length', 'scores'],
       dtype='object')</code></pre>
 </div>
 </div>
 </section>
 <section id="part-b-explore-the-data" class="level3">
-<h3 class="anchored" data-anchor-id="part-b-explore-the-data">Part B: Explore The Data</h3>
+<h3 class="anchored" data-anchor-id="part-b-explore-the-data"><strong>Part B: Explore The Data</strong></h3>
 <p>Now, we can make a few figures to explore what the data is saying. First, I created a scatterplot to show the relationship between a person’s age and their credit history length. As can be inferred, older people generally have longer credit histories.</p>
-<div id="cell-9" class="cell" data-execution_count="138">
+<div id="cell-9" class="cell" data-execution_count="210">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># cut out the huge outlier--person making 6m/yr--so that we can see patterns more clearly</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>p1 <span class="op">=</span> sns.scatterplot(df_train[df_train[<span class="st">"person_age"</span>] <span class="op">&lt;</span> <span class="dv">100</span>], x <span class="op">=</span> <span class="st">"cb_person_cred_hist_length"</span>, y <span class="op">=</span> <span class="st">'person_age'</span>, hue <span class="op">=</span> <span class="st">'cb_person_default_on_file'</span>, style <span class="op">=</span> <span class="st">'cb_person_default_on_file'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -254,9 +255,9 @@ background-size: cover;
 </div>
 </div>
 <p>However, I was very interested in the fact that whether or not people defaulted on their loan seemed not to be reliant on age. There are orange x’s in all parts of the plot. Because of this, I wanted to look at the mean age for people who had a history of defaulting and people who didn’t.</p>
-<div id="cell-11" class="cell" data-execution_count="157">
+<div id="cell-11" class="cell" data-execution_count="211">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df_train.groupby(<span class="st">"cb_person_default_on_file"</span>)[<span class="st">"person_age"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="157">
+<div class="cell-output cell-output-display" data-execution_count="211">
 <pre><code>cb_person_default_on_file
 N    27.721878
 Y    27.793096
@@ -265,10 +266,10 @@ Name: person_age, dtype: float64</code></pre>
 </div>
 <p>As you can see, although the average age for people who had defaulted was slightly bigger, they still both had averages of about 27. This was surprising to me because I had previously assumed that people who are older, and therefore have longer credit histories, would be more likely to have defaulted on a loan. I wonder if this is due to financial differences between generations.</p>
 <p>Next, I wanted to look at interest rate based on history of defaulting. I assumed before making the plot that people who had defaulted before would be given a higher interest rate, and I was correct.</p>
-<div id="cell-13" class="cell" data-execution_count="156">
+<div id="cell-13" class="cell" data-execution_count="212">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>barplot <span class="op">=</span> sns.barplot(df_train, x <span class="op">=</span> <span class="st">"cb_person_default_on_file"</span>, y <span class="op">=</span> <span class="st">"loan_int_rate"</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>barplot.set_title(<span class="st">"Average loan interest rate separated by previous loan defaults"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="156">
+<div class="cell-output cell-output-display" data-execution_count="212">
 <pre><code>Text(0.5, 1.0, 'Average loan interest rate separated by previous loan defaults')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -281,9 +282,9 @@ Name: person_age, dtype: float64</code></pre>
 </div>
 <p>Here, we can see that the average loan interest rate for those who had not defaulted on a loan previously is about 10%. For those who had, it was about 15%. A 5% increase is quite significant, and it seems like having a clean loan history would significantly benefit someone’s chances at getting a good interest rate.</p>
 <p>Next, I wanted to look at the factors which played into loan intent. To do this, I created a table showing the home ownership counts per loan intent.</p>
-<div id="cell-15" class="cell" data-execution_count="102">
+<div id="cell-15" class="cell" data-execution_count="213">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df_train.groupby(<span class="st">"loan_intent"</span>)[<span class="st">"person_home_ownership"</span>].value_counts()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="102">
+<div class="cell-output cell-output-display" data-execution_count="213">
 <pre><code>loan_intent        person_home_ownership
 DEBTCONSOLIDATION  RENT                     2260
                    MORTGAGE                 1841
@@ -314,7 +315,7 @@ Name: count, dtype: int64</code></pre>
 </div>
 <p>We can see here that there isn’t too much variation, but there are definitely differences that stand out. By far, the most popular type of loan for homeowners is a venture loan, and very few homeowners requested a debt consolidation loan. People with mortgages were spread out pretty evenly across the board, but home improvement had the least mortgagers. By far, home improvement was the least popular type of loan amongst renters. All of these make sense to me for a few reasons. Homeowners gravitated towards venture loans because, in general, they are likely to be more financially stable. Renters did not go for the home improvement loans because they likely don’t have much say in what gets done on the property they are renting. There are so few people in the “other” category that it is hard to pick out trends.</p>
 <p>Next, we are going to prepare the data the same way that we did last time. We will split into x and y, removing the target variables from the training set. We will also get rid of null variables.</p>
-<div id="cell-18" class="cell" data-execution_count="162">
+<div id="cell-18" class="cell" data-execution_count="214">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.preprocessing <span class="im">import</span> LabelEncoder</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>le <span class="op">=</span> LabelEncoder()</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>le.fit(df_train[<span class="st">"loan_status"</span>])</span>
@@ -328,7 +329,7 @@ Name: count, dtype: int64</code></pre>
 <span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>x_train, y_train <span class="op">=</span> prepare_data(df_train)</span>
 <span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>x_train</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="162">
+<div class="cell-output cell-output-display" data-execution_count="214">
 <div>
 
 
@@ -633,9 +634,9 @@ Name: count, dtype: int64</code></pre>
 </div>
 </section>
 <section id="part-c-build-a-model" class="level3">
-<h3 class="anchored" data-anchor-id="part-c-build-a-model">Part C: Build a Model</h3>
+<h3 class="anchored" data-anchor-id="part-c-build-a-model"><strong>Part C: Build a Model</strong></h3>
 <p>Now that the data is properly processed, we can train a logistic regression model. This will follow a similar process to the Penguins blog post, where we loop through all possible combinations of 3 features and add their scores and models to a list.</p>
-<div id="cell-21" class="cell" data-execution_count="163">
+<div id="cell-21" class="cell" data-execution_count="215">
 <div class="sourceCode cell-code" id="annotated-cell-8"><pre class="sourceCode python code-annotation-code code-with-copy"><code class="sourceCode python"><span id="annotated-cell-8-1"><a href="#annotated-cell-8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> itertools <span class="im">import</span> combinations</span>
 <span id="annotated-cell-8-2"><a href="#annotated-cell-8-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.linear_model <span class="im">import</span> LogisticRegression</span>
 <span id="annotated-cell-8-3"><a href="#annotated-cell-8-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -656,7 +657,7 @@ Name: count, dtype: int64</code></pre>
 <span id="annotated-cell-8-18"><a href="#annotated-cell-8-18" aria-hidden="true" tabindex="-1"></a>    scores.append((cols, new_score, LR))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now, we can find the maximum score in the list of results from the model. We can then split up our results into the attributes, the score, and the logistic regression model.</p>
-<div id="cell-23" class="cell" data-execution_count="164">
+<div id="cell-23" class="cell" data-execution_count="216">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> operator <span class="im">import</span> itemgetter</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>best_combo <span class="op">=</span> <span class="bu">max</span>(scores, key <span class="op">=</span> itemgetter(<span class="dv">1</span>))</span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(best_combo)</span>
@@ -668,7 +669,7 @@ Name: count, dtype: int64</code></pre>
 </div>
 </div>
 <p>Before we move on, we should make sure the model doesn’t perform drastically worse on unseen data. Below, we cross-validate our model.</p>
-<div id="cell-25" class="cell" data-execution_count="11">
+<div id="cell-25" class="cell" data-execution_count="217">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> cross_val_score</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>cv_scores_LR <span class="op">=</span> cross_val_score(best_lr, x_train[best_attrs], y_train, cv<span class="op">=</span><span class="dv">5</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(cv_scores_LR.mean())</span>
@@ -676,10 +677,10 @@ Name: count, dtype: int64</code></pre>
 </div>
 <p>We could have gone through and cross-validated all the possible models, but this score is close enough to our initial score that it is okay to continue.In fact, it performed slightly better on the cross-validation than on the training data. Let’s continue.</p>
 <p>Below, we can extract the w vector (weights) from our best logistic regression model.</p>
-<div id="cell-28" class="cell" data-execution_count="12">
+<div id="cell-28" class="cell" data-execution_count="218">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> pd.Series(best_lr.coef_[<span class="dv">0</span>])</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="12">
+<div class="cell-output cell-output-display" data-execution_count="218">
 <pre><code>0   -0.019247
 1    8.281007
 2   -0.735289
@@ -691,12 +692,14 @@ dtype: float64</code></pre>
 </div>
 </section>
 <section id="part-d-find-a-threshold" class="level3">
-<h3 class="anchored" data-anchor-id="part-d-find-a-threshold">Part D: Find a Threshold</h3>
-<div id="cell-30" class="cell" data-execution_count="13">
+<h3 class="anchored" data-anchor-id="part-d-find-a-threshold"><strong>Part D: Find a Threshold</strong></h3>
+<p>Now we begin the process of determining what the most profitable threshold is for the bank. We can start by defining our scoring function, which is just going to be the dot product of the weight vector <strong>w</strong>.</p>
+<div id="cell-31" class="cell" data-execution_count="219">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> score_function(w, x):</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> x<span class="op">@</span>w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-31" class="cell" data-execution_count="45">
+<p>We can also plot out these scores by frequency:</p>
+<div id="cell-33" class="cell" data-execution_count="220">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>x_train[<span class="st">'scores'</span>] <span class="op">=</span> score_function(w.values, x_train[best_attrs])</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>, <span class="dv">1</span>, figsize <span class="op">=</span> (<span class="dv">6</span>, <span class="dv">4</span>))</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>hist <span class="op">=</span> ax.hist(x_train[<span class="st">'scores'</span>], bins <span class="op">=</span> <span class="dv">50</span>, color <span class="op">=</span> <span class="st">"steelblue"</span>, alpha <span class="op">=</span> <span class="fl">0.6</span>, linewidth <span class="op">=</span> <span class="dv">1</span>, edgecolor <span class="op">=</span> <span class="st">"black"</span>)</span>
@@ -709,7 +712,9 @@ dtype: float64</code></pre>
 </div>
 </div>
 </div>
-<div id="cell-32" class="cell" data-execution_count="46">
+<p>Most of the scores fall between 0 and 2. This gives us an idea for where the threshold may fall as well.</p>
+<p>We can now define the benefit function. We are going to stick with the function given in the assignment, because I do not know much about bank profits!</p>
+<div id="cell-35" class="cell" data-execution_count="221">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> get_benefit(loan_amt, loan_int_rate, default):</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    loan_int_rate <span class="op">=</span> loan_int_rate<span class="op">/</span><span class="dv">100</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> default <span class="op">==</span> <span class="va">False</span>:</span>
@@ -718,11 +723,12 @@ dtype: float64</code></pre>
 <span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>        cost <span class="op">=</span> loan_amt<span class="op">*</span>(<span class="dv">1</span> <span class="op">+</span> <span class="fl">0.25</span><span class="op">*</span>loan_int_rate)<span class="op">**</span><span class="dv">3</span> <span class="op">-</span> <span class="fl">1.7</span><span class="op">*</span>loan_amt</span>
 <span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> cost</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-33" class="cell" data-execution_count="69">
+<p>Next, I added a column into the dataset for c (profit for someone who doesn’t default) and C (profit for someone who defaults). This helps me to be able to filter more easily in the future! I made sure to apply the function to the whole pandas series for each column, since Pandas can handle vector arithmetic.</p>
+<div id="cell-37" class="cell" data-execution_count="222">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>x_train[<span class="st">'c'</span>] <span class="op">=</span> get_benefit(x_train[<span class="st">"loan_amnt"</span>], x_train[<span class="st">"loan_int_rate"</span>], <span class="va">False</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>x_train[<span class="st">'C'</span>] <span class="op">=</span> get_benefit(x_train[<span class="st">"loan_amnt"</span>], x_train[<span class="st">"loan_int_rate"</span>], <span class="va">True</span>)</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>x_train.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="69">
+<div class="cell-output cell-output-display" data-execution_count="222">
 <div>
 
 
@@ -748,9 +754,9 @@ dtype: float64</code></pre>
 <th data-quarto-table-cell-role="th">loan_grade_G</th>
 <th data-quarto-table-cell-role="th">cb_person_default_on_file_N</th>
 <th data-quarto-table-cell-role="th">cb_person_default_on_file_Y</th>
+<th data-quarto-table-cell-role="th">scores</th>
 <th data-quarto-table-cell-role="th">c</th>
 <th data-quarto-table-cell-role="th">C</th>
-<th data-quarto-table-cell-role="th">scores</th>
 </tr>
 </thead>
 <tbody>
@@ -774,9 +780,9 @@ dtype: float64</code></pre>
 <td>False</td>
 <td>False</td>
 <td>True</td>
+<td>1.201226</td>
 <td>4613.567568</td>
 <td>-6997.533847</td>
-<td>1.201226</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">2</td>
@@ -798,9 +804,9 @@ dtype: float64</code></pre>
 <td>False</td>
 <td>True</td>
 <td>False</td>
+<td>2.404884</td>
 <td>2044.334031</td>
 <td>-6426.108799</td>
-<td>2.404884</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">3</td>
@@ -822,9 +828,9 @@ dtype: float64</code></pre>
 <td>False</td>
 <td>True</td>
 <td>False</td>
+<td>0.640802</td>
 <td>493.650464</td>
 <td>-795.445199</td>
-<td>0.640802</td>
 </tr>
 <tr class="even">
 <td data-quarto-table-cell-role="th">4</td>
@@ -846,9 +852,9 @@ dtype: float64</code></pre>
 <td>False</td>
 <td>True</td>
 <td>False</td>
+<td>1.5449</td>
 <td>4028.690420</td>
 <td>-9390.333437</td>
-<td>1.5449</td>
 </tr>
 <tr class="odd">
 <td data-quarto-table-cell-role="th">6</td>
@@ -870,9 +876,9 @@ dtype: float64</code></pre>
 <td>False</td>
 <td>True</td>
 <td>False</td>
+<td>2.297004</td>
 <td>2430.522429</td>
 <td>-3211.752128</td>
-<td>2.297004</td>
 </tr>
 </tbody>
 </table>
@@ -881,7 +887,8 @@ dtype: float64</code></pre>
 </div>
 </div>
 </div>
-<div id="cell-34" class="cell" data-execution_count="74">
+<p>Now for the actual calculations! Below, we loop through 101 possible threshold values and find the benefit for each one. We maintain an array of thresholds and an array of benefits for easy plotting.</p>
+<div id="cell-39" class="cell" data-execution_count="223">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>best_benefit <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>best_threshold <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>t_arr <span class="op">=</span> []</span>
@@ -900,10 +907,10 @@ dtype: float64</code></pre>
 <span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>plt.plot(t_arr, benefits)</span>
 <span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>plt.plot(best_threshold, best_benefit, marker<span class="op">=</span><span class="st">"o"</span>)</span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"Best benefit per person: </span><span class="sc">{</span>(best_benefit<span class="op">/</span><span class="bu">len</span>(x_train[x_train[<span class="st">"scores"</span>] <span class="op">&lt;</span> best_threshold]))<span class="sc">.</span><span class="bu">round</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="ss"> </span><span class="ch">\n</span><span class="ss">Best threshold: </span><span class="sc">{</span>best_threshold<span class="sc">}</span><span class="ss">"</span>)</span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"Best benefit per person: $</span><span class="sc">{</span>(best_benefit<span class="op">/</span><span class="bu">len</span>(x_train[x_train[<span class="st">"scores"</span>] <span class="op">&lt;</span> best_threshold]))<span class="sc">.</span><span class="bu">round</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="ss"> </span><span class="ch">\n</span><span class="ss">Best threshold: </span><span class="sc">{</span>best_threshold<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Threshold score"</span>)</span>
 <span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Total benefit in dollars"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="74">
+<div class="cell-output cell-output-display" data-execution_count="223">
 <pre><code>Text(0, 0.5, 'Total benefit in dollars')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -914,14 +921,18 @@ dtype: float64</code></pre>
 </div>
 </div>
 </div>
-<div id="cell-35" class="cell" data-execution_count="70">
+<p>We have outputted this plot which shows us the curve of threshold plotted against benefit! We can also see that our best benefit per borrower is $1,868.62, and our optimal threshold is 1.14. Now, let’s test this model and threshold against our testing data. Hopefully, since we did well with the cross-validation, we will do well on the yet unseen data.</p>
+</section>
+<section id="part-e-evaluate-your-model-from-the-banks-perspective" class="level3">
+<h3 class="anchored" data-anchor-id="part-e-evaluate-your-model-from-the-banks-perspective"><strong>Part E: Evaluate Your Model from the Bank’s Perspective</strong></h3>
+<div id="cell-42" class="cell" data-execution_count="224">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">"https://raw.githubusercontent.com/PhilChodrow/ml-notes/main/data/credit-risk/test.csv"</span></span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>df_test <span class="op">=</span> pd.read_csv(url)</span>
 <span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>x_test, y_test <span class="op">=</span> prepare_data(df_test)</span>
 <span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>x_test[<span class="st">'c'</span>] <span class="op">=</span> get_benefit(x_test[<span class="st">"loan_amnt"</span>], x_test[<span class="st">"loan_int_rate"</span>], <span class="va">False</span>)</span>
 <span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>x_test[<span class="st">'C'</span>] <span class="op">=</span> get_benefit(x_test[<span class="st">"loan_amnt"</span>], x_test[<span class="st">"loan_int_rate"</span>], <span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="cell-36" class="cell" data-execution_count="78">
+<div id="cell-43" class="cell" data-execution_count="225">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> best_threshold</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="co"># compute the scores</span></span>
@@ -934,10 +945,108 @@ dtype: float64</code></pre>
 <span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co"># compute the expected gain</span></span>
 <span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>gain <span class="op">=</span> x_test[<span class="st">'c'</span>][x_test[<span class="st">'scores'</span>] <span class="op">&gt;=</span> t].<span class="bu">sum</span>()<span class="op">*</span>TN  <span class="op">-</span> x_test[<span class="st">'c'</span>][x_test[<span class="st">'scores'</span>] <span class="op">&gt;=</span> t].<span class="bu">sum</span>()<span class="op">*</span>FN</span>
 <span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>gain<span class="op">/</span><span class="bu">len</span>(x_test[x_test[<span class="st">"scores"</span>] <span class="op">&lt;</span> t])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="78">
+<div class="cell-output cell-output-display" data-execution_count="225">
 <pre><code>np.float64(1361.3320954051185)</code></pre>
 </div>
 </div>
+<p>Our profit per borrower is $1,361.33. Not as much as in our training data, but not bad!</p>
+</section>
+<section id="part-f-evaluate-your-model-from-the-borrowers-perspective" class="level3">
+<h3 class="anchored" data-anchor-id="part-f-evaluate-your-model-from-the-borrowers-perspective"><strong>Part F: Evaluate Your Model From the Borrower’s Perspective</strong></h3>
+<section id="is-it-more-difficult-for-people-in-certain-age-groups-to-access-credit-under-your-proposed-system" class="level5">
+<h5 class="anchored" data-anchor-id="is-it-more-difficult-for-people-in-certain-age-groups-to-access-credit-under-your-proposed-system">1. Is it more difficult for people in certain age groups to access credit under your proposed system?</h5>
+<p>Let’s look at a plot and find out.</p>
+<div id="cell-46" class="cell" data-execution_count="226">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>plot <span class="op">=</span> sns.scatterplot(x_train[x_train[<span class="st">"person_age"</span>] <span class="op">&lt;</span> <span class="dv">100</span>], x <span class="op">=</span> <span class="st">"person_age"</span>, y <span class="op">=</span> <span class="st">"scores"</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>plot.set_title(<span class="st">"Scores against age for prospective borrowers"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="226">
+<pre><code>Text(0.5, 1.0, 'Scores against age for prospective borrowers')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-20-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>It doesn’t look like there is much correlation between score and age.</p>
+</section>
+<section id="is-it-more-difficult-for-people-to-get-loans-in-order-to-pay-for-medical-expenses-how-does-this-compare-with-the-actual-rate-of-default-in-that-group-what-about-people-seeking-loans-for-business-ventures-or-education" class="level5">
+<h5 class="anchored" data-anchor-id="is-it-more-difficult-for-people-to-get-loans-in-order-to-pay-for-medical-expenses-how-does-this-compare-with-the-actual-rate-of-default-in-that-group-what-about-people-seeking-loans-for-business-ventures-or-education">Is it more difficult for people to get loans in order to pay for medical expenses? How does this compare with the actual rate of default in that group? What about people seeking loans for business ventures or education?</h5>
+<p>Let’s check out the data:</p>
+<div id="cell-49" class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>df_train[<span class="st">"scores"</span>] <span class="op">=</span> x_train[<span class="st">"scores"</span>]</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>df_train.groupby(<span class="st">"loan_intent"</span>)[<span class="st">"scores"</span>].<span class="bu">max</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="258">
+<pre><code>loan_intent
+DEBTCONSOLIDATION     6.14476
+EDUCATION            6.449154
+HOMEIMPROVEMENT       6.06195
+MEDICAL              5.965717
+PERSONAL             6.137947
+VENTURE               5.89633
+Name: scores, dtype: object</code></pre>
+</div>
+</div>
+<p>So the maximum score for medical is lower than almost all the other maximum scores. However, this may not reflect the average score given to medical borrowers.</p>
+<div id="cell-51" class="cell" data-execution_count="263">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>df_train.groupby(<span class="st">"loan_intent"</span>)[<span class="st">"scores"</span>].mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="263">
+<pre><code>loan_intent
+DEBTCONSOLIDATION    1.114447
+EDUCATION             1.00498
+HOMEIMPROVEMENT      0.873225
+MEDICAL              1.100077
+PERSONAL             0.969918
+VENTURE              0.900046
+Name: scores, dtype: object</code></pre>
+</div>
+</div>
+<p>Here, we can see that the average score for a medical loan request is actually higher than many of the other categories. In general, the Venture category has a low score for both the max score and the mean score. Debt consolidation tends to score hgih, as does education. Medical flips from the high end (mean) to the low end (max). We can also look at the count of each that got a loan, as opposed to the true default values.</p>
+<div id="cell-53" class="cell" data-execution_count="270">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>df_train[df_train[<span class="st">"scores"</span>] <span class="op">&gt;=</span> best_threshold].groupby(<span class="st">"loan_intent"</span>).size() <span class="op">-</span> df_train[df_train[<span class="st">"scores"</span>] <span class="op">&gt;=</span> best_threshold][df_train[<span class="st">"loan_status"</span>] <span class="op">==</span> <span class="dv">0</span>].groupby(<span class="st">"loan_intent"</span>).size()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/sy/9tmrg3gx65vf4qjw8jl8ytsc0000gn/T/ipykernel_82223/2869003493.py:1: UserWarning: Boolean Series key will be reindexed to match DataFrame index.
+  df_train[df_train["scores"] &gt;= best_threshold].groupby("loan_intent").size() - df_train[df_train["scores"] &gt;= best_threshold][df_train["loan_status"] == 0].groupby("loan_intent").size()</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="270">
+<pre><code>loan_intent
+DEBTCONSOLIDATION    648
+EDUCATION            574
+HOMEIMPROVEMENT      424
+MEDICAL              718
+PERSONAL             534
+VENTURE              468
+dtype: int64</code></pre>
+</div>
+</div>
+<p>Here, we calculated the number of people in each loan intent group that were above the threshold and defaulted. Overall, it seems like the error rate among groups was pretty equal when you consider the size of the groups.</p>
+</section>
+<section id="how-does-a-persons-income-level-impact-the-ease-with-which-they-can-access-credit-under-your-decision-system" class="level5">
+<h5 class="anchored" data-anchor-id="how-does-a-persons-income-level-impact-the-ease-with-which-they-can-access-credit-under-your-decision-system">How does a person’s income level impact the ease with which they can access credit under your decision system?</h5>
+<div id="cell-56" class="cell" data-execution_count="275">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(x <span class="op">=</span> x_train[x_train[<span class="st">"person_income"</span>] <span class="op">&lt;</span> <span class="dv">2000000</span>][<span class="st">"person_income"</span>], y <span class="op">=</span> x_train[<span class="st">"scores"</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-24-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Overall, it seems like lower-income people are more likely to receive a higher score. This is interesting to me because I would assume those who are higher income would be more likely to pay off their loans. However, maybe interest rates are higher among lower-income people in this dataset. Also, it could have something to do with the reasons people are requesting loans.</p>
+</section>
+</section>
+<section id="part-g-write-and-reflect" class="level3">
+<h3 class="anchored" data-anchor-id="part-g-write-and-reflect"><strong>Part G: Write and Reflect</strong></h3>
+<section id="considering-that-people-seeking-loans-for-medical-expense-have-high-rates-of-default-is-it-fair-that-it-is-more-difficult-for-them-to-obtain-access-to-credit" class="level5">
+<h5 class="anchored" data-anchor-id="considering-that-people-seeking-loans-for-medical-expense-have-high-rates-of-default-is-it-fair-that-it-is-more-difficult-for-them-to-obtain-access-to-credit">Considering that people seeking loans for medical expense have high rates of default, is it fair that it is more difficult for them to obtain access to credit?</h5>
+<p>I think this depends on whether you are thinking from a utilitarian or ethical view of fairness. I also think that fairness is not necessary always ethical in the ways people use it. I believe that it is unfair that people who need help cannot access it, and I think it is sad that profits are often prioritized over people. However, I can see how someone would argue that while it is unethical to deny someone a medical loan, it may still be fair. Basing loans off of likelihood of default is an objective way of making the decision, and I think some people see objectivity as fairness.</p>
+</section>
+</section>
+<section id="discussion" class="level3">
+<h3 class="anchored" data-anchor-id="discussion"><strong>Discussion</strong></h3>
 
 
 </section>
