@@ -888,7 +888,7 @@ dtype: float64</code></pre>
 </div>
 </div>
 <p>Now for the actual calculations! Below, we loop through 101 possible threshold values and find the benefit for each one. We maintain an array of thresholds and an array of benefits for easy plotting.</p>
-<div id="cell-39" class="cell" data-execution_count="291">
+<div id="cell-39" class="cell" data-execution_count="308">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>best_benefit <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>best_threshold <span class="op">=</span> <span class="dv">0</span></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>t_arr <span class="op">=</span> []</span>
@@ -910,7 +910,7 @@ dtype: float64</code></pre>
 <span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"Best benefit per person: $</span><span class="sc">{</span>(best_benefit<span class="op">/</span><span class="bu">len</span>(x_train[x_train[<span class="st">"scores"</span>] <span class="op">&lt;</span> best_threshold]))<span class="sc">.</span><span class="bu">round</span>(<span class="dv">2</span>)<span class="sc">}</span><span class="ss"> </span><span class="ch">\n</span><span class="ss">Best threshold: </span><span class="sc">{</span>best_threshold<span class="sc">}</span><span class="ss">"</span>)</span>
 <span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Threshold score"</span>)</span>
 <span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Total benefit in dollars"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="291">
+<div class="cell-output cell-output-display" data-execution_count="308">
 <pre><code>Text(0, 0.5, 'Total benefit in dollars')</code></pre>
 </div>
 <div class="cell-output cell-output-display">
@@ -1042,7 +1042,9 @@ dtype: int64</code></pre>
 <h3 class="anchored" data-anchor-id="part-g-write-and-reflect"><strong>Part G: Write and Reflect</strong></h3>
 <section id="considering-that-people-seeking-loans-for-medical-expense-have-high-rates-of-default-is-it-fair-that-it-is-more-difficult-for-them-to-obtain-access-to-credit" class="level5">
 <h5 class="anchored" data-anchor-id="considering-that-people-seeking-loans-for-medical-expense-have-high-rates-of-default-is-it-fair-that-it-is-more-difficult-for-them-to-obtain-access-to-credit">Considering that people seeking loans for medical expense have high rates of default, is it fair that it is more difficult for them to obtain access to credit?</h5>
-<p>I think this depends on whether you are thinking from a utilitarian or ethical view of fairness. I also think that fairness is not necessary always ethical in the ways people use it. I believe that it is unfair that people who need help cannot access it, and I think it is sad that profits are often prioritized over people. However, I can see how someone would argue that while it is unethical to deny someone a medical loan, it may still be fair. Basing loans off of likelihood of default is an objective way of making the decision, and I think some people see objectivity as fairness.</p>
+<p>I think this depends on whether you are thinking from a utilitarian or ethical view of fairness. I also think that fairness is not necessary always ethical in the ways people use it. I believe that it is unfair that people who need help cannot access it, and I think it is sad that profits are often prioritized over people.</p>
+<p>My definition of fairness: Equity–people who need help get it.</p>
+<p>However, I can see how someone would argue that while it is unethical to deny someone a medical loan, it may still be fair. Basing loans off of likelihood of default is an objective way of making the decision, and I think some people see objectivity as fairness.</p>
 </section>
 </section>
 <section id="discussion" class="level3">
