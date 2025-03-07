@@ -3,6 +3,7 @@
     "listing": "/index.html",
     "items": [
       "/posts/ADS/index.html",
+      "/posts/auditing_bias/index.html",
       "/posts/Penguins/index.html"
     ]
   }
