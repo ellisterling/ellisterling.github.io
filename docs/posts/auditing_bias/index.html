@@ -23,10 +23,44 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -87,6 +121,9 @@ background-image: url(../../img/landscape.png);
 background-size: cover;
       }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -177,6 +214,315 @@ background-size: cover;
 
 <section id="abstract" class="level3">
 <h3 class="anchored" data-anchor-id="abstract"><strong>Abstract</strong></h3>
+<div id="cell-2" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> folktables <span class="im">import</span> ACSDataSource, ACSEmployment, BasicProblem, adult_filter</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>STATE <span class="op">=</span> <span class="st">"MI"</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>data_source <span class="op">=</span> ACSDataSource(survey_year<span class="op">=</span><span class="st">'2018'</span>, </span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>                            horizon<span class="op">=</span><span class="st">'1-Year'</span>, </span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                            survey<span class="op">=</span><span class="st">'person'</span>)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>acs_data <span class="op">=</span> data_source.get_data(states<span class="op">=</span>[STATE], download<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>acs_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">RT</th>
+<th data-quarto-table-cell-role="th">SERIALNO</th>
+<th data-quarto-table-cell-role="th">DIVISION</th>
+<th data-quarto-table-cell-role="th">SPORDER</th>
+<th data-quarto-table-cell-role="th">PUMA</th>
+<th data-quarto-table-cell-role="th">REGION</th>
+<th data-quarto-table-cell-role="th">ST</th>
+<th data-quarto-table-cell-role="th">ADJINC</th>
+<th data-quarto-table-cell-role="th">PWGTP</th>
+<th data-quarto-table-cell-role="th">AGEP</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">PWGTP71</th>
+<th data-quarto-table-cell-role="th">PWGTP72</th>
+<th data-quarto-table-cell-role="th">PWGTP73</th>
+<th data-quarto-table-cell-role="th">PWGTP74</th>
+<th data-quarto-table-cell-role="th">PWGTP75</th>
+<th data-quarto-table-cell-role="th">PWGTP76</th>
+<th data-quarto-table-cell-role="th">PWGTP77</th>
+<th data-quarto-table-cell-role="th">PWGTP78</th>
+<th data-quarto-table-cell-role="th">PWGTP79</th>
+<th data-quarto-table-cell-role="th">PWGTP80</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>P</td>
+<td>2018GQ0000064</td>
+<td>3</td>
+<td>1</td>
+<td>2907</td>
+<td>2</td>
+<td>26</td>
+<td>1013097</td>
+<td>8</td>
+<td>60</td>
+<td>...</td>
+<td>9</td>
+<td>0</td>
+<td>12</td>
+<td>9</td>
+<td>11</td>
+<td>9</td>
+<td>0</td>
+<td>9</td>
+<td>10</td>
+<td>12</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>P</td>
+<td>2018GQ0000154</td>
+<td>3</td>
+<td>1</td>
+<td>1200</td>
+<td>2</td>
+<td>26</td>
+<td>1013097</td>
+<td>92</td>
+<td>20</td>
+<td>...</td>
+<td>92</td>
+<td>91</td>
+<td>93</td>
+<td>95</td>
+<td>93</td>
+<td>173</td>
+<td>91</td>
+<td>15</td>
+<td>172</td>
+<td>172</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>P</td>
+<td>2018GQ0000158</td>
+<td>3</td>
+<td>1</td>
+<td>2903</td>
+<td>2</td>
+<td>26</td>
+<td>1013097</td>
+<td>26</td>
+<td>54</td>
+<td>...</td>
+<td>26</td>
+<td>52</td>
+<td>3</td>
+<td>25</td>
+<td>25</td>
+<td>28</td>
+<td>28</td>
+<td>50</td>
+<td>51</td>
+<td>25</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>P</td>
+<td>2018GQ0000174</td>
+<td>3</td>
+<td>1</td>
+<td>1801</td>
+<td>2</td>
+<td>26</td>
+<td>1013097</td>
+<td>86</td>
+<td>20</td>
+<td>...</td>
+<td>85</td>
+<td>12</td>
+<td>87</td>
+<td>12</td>
+<td>87</td>
+<td>85</td>
+<td>157</td>
+<td>86</td>
+<td>86</td>
+<td>86</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>P</td>
+<td>2018GQ0000212</td>
+<td>3</td>
+<td>1</td>
+<td>2600</td>
+<td>2</td>
+<td>26</td>
+<td>1013097</td>
+<td>99</td>
+<td>33</td>
+<td>...</td>
+<td>98</td>
+<td>96</td>
+<td>98</td>
+<td>95</td>
+<td>174</td>
+<td>175</td>
+<td>96</td>
+<td>95</td>
+<td>179</td>
+<td>97</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 286 columns</p>
+</div>
+</div>
+</div>
+<div id="cell-3" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>possible_features<span class="op">=</span>[<span class="st">'AGEP'</span>, <span class="st">'SCHL'</span>, <span class="st">'MAR'</span>, <span class="st">'RELP'</span>, <span class="st">'DIS'</span>, <span class="st">'ESP'</span>, <span class="st">'CIT'</span>, <span class="st">'MIG'</span>, <span class="st">'MIL'</span>, <span class="st">'ANC'</span>, <span class="st">'NATIVITY'</span>, <span class="st">'DEAR'</span>, <span class="st">'DEYE'</span>, <span class="st">'DREM'</span>, <span class="st">'SEX'</span>, <span class="st">'RAC1P'</span>, <span class="st">'ESR'</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>acs_data[possible_features].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AGEP</th>
+<th data-quarto-table-cell-role="th">SCHL</th>
+<th data-quarto-table-cell-role="th">MAR</th>
+<th data-quarto-table-cell-role="th">RELP</th>
+<th data-quarto-table-cell-role="th">DIS</th>
+<th data-quarto-table-cell-role="th">ESP</th>
+<th data-quarto-table-cell-role="th">CIT</th>
+<th data-quarto-table-cell-role="th">MIG</th>
+<th data-quarto-table-cell-role="th">MIL</th>
+<th data-quarto-table-cell-role="th">ANC</th>
+<th data-quarto-table-cell-role="th">NATIVITY</th>
+<th data-quarto-table-cell-role="th">DEAR</th>
+<th data-quarto-table-cell-role="th">DEYE</th>
+<th data-quarto-table-cell-role="th">DREM</th>
+<th data-quarto-table-cell-role="th">SEX</th>
+<th data-quarto-table-cell-role="th">RAC1P</th>
+<th data-quarto-table-cell-role="th">ESR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>60</td>
+<td>15.0</td>
+<td>5</td>
+<td>17</td>
+<td>1</td>
+<td>NaN</td>
+<td>1</td>
+<td>1.0</td>
+<td>4.0</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>1.0</td>
+<td>1</td>
+<td>2</td>
+<td>6.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>20</td>
+<td>19.0</td>
+<td>5</td>
+<td>17</td>
+<td>2</td>
+<td>NaN</td>
+<td>1</td>
+<td>1.0</td>
+<td>4.0</td>
+<td>2</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>2.0</td>
+<td>2</td>
+<td>1</td>
+<td>6.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>54</td>
+<td>18.0</td>
+<td>3</td>
+<td>16</td>
+<td>1</td>
+<td>NaN</td>
+<td>1</td>
+<td>1.0</td>
+<td>4.0</td>
+<td>4</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>1.0</td>
+<td>1</td>
+<td>1</td>
+<td>6.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>20</td>
+<td>18.0</td>
+<td>5</td>
+<td>17</td>
+<td>2</td>
+<td>NaN</td>
+<td>1</td>
+<td>1.0</td>
+<td>4.0</td>
+<td>4</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>2.0</td>
+<td>1</td>
+<td>1</td>
+<td>6.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>33</td>
+<td>18.0</td>
+<td>5</td>
+<td>16</td>
+<td>2</td>
+<td>NaN</td>
+<td>1</td>
+<td>3.0</td>
+<td>4.0</td>
+<td>2</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>2.0</td>
+<td>1</td>
+<td>1</td>
+<td>6.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
 
 
 </section>
