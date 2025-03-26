@@ -2,6 +2,7 @@
   {
     "listing": "/index.html",
     "items": [
+      "/posts/quantifying-bias/index.html",
       "/posts/perceptron/index.html",
       "/posts/auditing_bias/index.html",
       "/posts/ADS/index.html",
