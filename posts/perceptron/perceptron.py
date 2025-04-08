@@ -1,6 +1,17 @@
 import torch
 torch.manual_seed(1234)
 
+def perceptron_data(n_points = 300, noise = 0.2):
+    
+    y = torch.arange(n_points) >= int(n_points/2)
+    X = y[:, None] + torch.normal(0.0, noise, size = (n_points,2))
+    X = torch.cat((X, torch.ones((X.shape[0], 1))), 1)
+
+    return X, y
+
+X, y = perceptron_data(n_points = 300, noise = 0.2)
+
+
 class LinearModel:
 
     def __init__(self, w=None):
@@ -13,9 +24,10 @@ class LinearModel:
 
     def predict(self, X):
         scores = self.score(X)
-        result = torch.zeros(len(scores))
-
-        return 0
+        zeroes = torch.zeros(len(scores))
+        ones = torch.ones(len(scores))
+        result = torch.where(scores >= self.w, ones, zeroes)
+        return result
 
 class Perceptron(LinearModel):
 
@@ -32,3 +44,7 @@ class PerceptronOptimizer:
 
     def step(self, X, y):
         return 0
+    
+p = Perceptron()
+s = p.score(X)
+print(s)
