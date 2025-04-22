@@ -20,14 +20,11 @@ class LinearModel:
     def score(self, X):
         if self.w is None: 
             self.w = torch.rand((X.size()[1]))
-        return torch.matmul(self.w, X)
+        return torch.matmul(X, self.w)
 
     def predict(self, X):
         scores = self.score(X)
-        zeroes = torch.zeros(len(scores))
-        ones = torch.ones(len(scores))
-        result = torch.where(scores >= self.w, ones, zeroes)
-        return result
+        return (scores >= 0).float()
 
 class Perceptron(LinearModel):
 
@@ -45,6 +42,7 @@ class PerceptronOptimizer:
     def step(self, X, y):
         return 0
     
-p = Perceptron()
+p = LinearModel()
 s = p.score(X)
-print(s)
+result = p.predict(X)
+print(result)
