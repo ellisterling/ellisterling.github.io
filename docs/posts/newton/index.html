@@ -9,7 +9,7 @@
 <meta name="author" content="Eleanor Sterling">
 <meta name="dcterms.date" content="2025-04-28">
 
-<title>Newtons Method and Adam – My Awesome CSCI 0451 Blog</title>
+<title>Newtons Method and Adam Optimizers – My Awesome CSCI 0451 Blog</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -59,7 +59,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -120,9 +120,6 @@ background-image: url(../../img/landscape.png);
 background-size: cover;
       }
 </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
-
-<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -170,7 +167,7 @@ background-size: cover;
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Newtons Method and Adam</h1>
+      <h1 class="title">Newtons Method and Adam Optimizers</h1>
                       </div>
   </div>
     
@@ -212,14 +209,17 @@ background-size: cover;
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> sklearn</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> math</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="preliminary-testing-of-newtons-method" class="level3">
 <h3 class="anchored" data-anchor-id="preliminary-testing-of-newtons-method">Preliminary Testing of Newton’s Method</h3>
+<p>First, we will take a synthetic dataset and test Newton’s Method. This will hopefully eliminate any errors that could occur because of the data.</p>
 <div id="9832566b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext autoreload</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>autoreload <span class="dv">2</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> newton <span class="im">import</span> LogisticRegression, GradientDescentOptimizer, NewtonOptimizer, AdamOptimizer</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> newton <span class="im">import</span> LogisticRegression, GradientDescentOptimizer, NewtonOptimizer, AdamOptimizer, StandardSGD</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="5dabc14e" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> classification_data(n_points <span class="op">=</span> <span class="dv">300</span>, noise <span class="op">=</span> <span class="fl">0.2</span>, p_dims <span class="op">=</span> <span class="dv">2</span>):</span>
@@ -233,10 +233,11 @@ background-size: cover;
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> classification_data(noise <span class="op">=</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>We will create two models: one that uses Newton’s Method as the optimizer and one that uses the Gradient Descent Optimizer. We will then compare and check to see that the w vectors they create are approximately similar.</p>
 <div id="a374615a" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> NewtonOptimizer()</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>loss_arr <span class="op">=</span> []</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">3300</span>):</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">40</span>):</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> opt.loss(X, y)</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    loss_arr.append(loss)</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    opt.step(X, y, alpha <span class="op">=</span> <span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -244,10 +245,10 @@ background-size: cover;
 <div id="089bb73a" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>opt2 <span class="op">=</span> GradientDescentOptimizer()</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>loss_arr2 <span class="op">=</span> []</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">120</span>):</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">150</span>):</span>
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> opt2.loss(X, y)</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    loss_arr2.append(loss)</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    opt2.step(X, y, alpha <span class="op">=</span> <span class="fl">0.1</span>, beta <span class="op">=</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    opt2.step(X, y, alpha <span class="op">=</span> <span class="fl">0.2</span>, beta <span class="op">=</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="eebfcf54" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>plt.plot(loss_arr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -326,10 +327,10 @@ background-size: cover;
 <div id="2ba7d7bb" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(opt.w, opt2.w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>tensor([ 1.6637,  1.3060, -0.7354], dtype=torch.float64) tensor([ 1.4493,  1.3094, -0.9240], dtype=torch.float64)</code></pre>
+<pre><code>tensor([ 3.8513,  2.7875, -2.9071], dtype=torch.float64) tensor([ 2.0984,  1.7615, -1.5457], dtype=torch.float64)</code></pre>
 </div>
 </div>
-<p>Very similar w values.</p>
+<p>We can see that although the w vectors are slightly different, they both separate the data pretty well. This could also be because Newton converged much more quickly than Gradient Descent, and therefore Gradient Descent could possibly converge slightly more and meet the w values for Newton.</p>
 </section>
 <section id="newtons-method-experiments" class="level3">
 <h3 class="anchored" data-anchor-id="newtons-method-experiments">Newton’s Method Experiments</h3>
@@ -344,14 +345,15 @@ background-size: cover;
 </div>
 </div>
 <div id="2807210f" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">filter</span> <span class="op">=</span> [<span class="st">"Pclass"</span>, <span class="st">"Sex"</span>, <span class="st">"Age"</span>, <span class="st">"SibSp"</span>, <span class="st">"Parch"</span>, <span class="st">"Fare"</span>, <span class="st">"Survived"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="bu">filter</span> <span class="op">=</span> [<span class="st">"Pclass"</span>, <span class="st">"Sex"</span>, <span class="st">"Age"</span>, <span class="st">"Fare"</span>, <span class="st">"Survived"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="858d0bde" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># fig, ax = plt.subplots(1, 1, figsize = (6, 4))</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># hist = ax.hist(df['Location'], bins = 50, color = "steelblue", alpha = 0.6, linewidth = 1, edgecolor = "black")</span></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a><span class="co"># |sns.countplot(df[df["Preference"] == 0], x = "Environmental_Concerns", hue = "Preference")</span></span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># sns.scatterplot(df, x = "Proximity_to_Mountains", y = "Vacation_Budget", hue = "Preference")</span></span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>sns.countplot(df, x <span class="op">=</span> <span class="st">"Pclass"</span>, hue <span class="op">=</span> <span class="st">"Survived"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="co"># sns.countplot(df, x = "Pclass", hue = "Survived")</span></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>sns.scatterplot(df, x <span class="op">=</span> <span class="st">"Fare"</span>, y <span class="op">=</span> <span class="st">"Age"</span>, hue <span class="op">=</span> <span class="st">"Survived"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
@@ -372,1266 +374,1229 @@ Name: count, dtype: int64</code></pre>
 <div id="525715cf" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df[<span class="bu">filter</span>]</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.dropna()</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.get_dummies(df)</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"Survived"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="15">
-<pre><code>0      0
-1      1
-2      1
-3      1
-4      0
-      ..
-885    0
-886    0
-887    1
-889    1
-890    0
-Name: Survived, Length: 714, dtype: int64</code></pre>
-</div>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.get_dummies(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="01620838" class="cell" data-execution_count="16">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>df_train, df_test <span class="op">=</span> train_test_split(df, test_size <span class="op">=</span> <span class="fl">0.2</span>)</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> df_train.drop(<span class="st">"Survived"</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> df_train[<span class="st">"Survived"</span>]</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> df_test.drop(<span class="st">"Survived"</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> df_test[<span class="st">"Survived"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>df_train, df_test <span class="op">=</span> train_test_split(df, test_size <span class="op">=</span> <span class="fl">0.3</span>)</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> df_train.drop(<span class="st">"Survived"</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> df_train[<span class="st">"Survived"</span>]</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> df_test.drop(<span class="st">"Survived"</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> df_test[<span class="st">"Survived"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="79e3ce2d" class="cell" data-execution_count="17">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>X_train_tensor <span class="op">=</span> torch.from_numpy(X_train.to_numpy().astype(<span class="bu">float</span>))</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>X_test_tensor <span class="op">=</span> torch.from_numpy(X_test.to_numpy().astype(<span class="bu">float</span>))</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>y_train_tensor <span class="op">=</span> torch.tensor(y_train.values, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>y_test_tensor <span class="op">=</span> torch.tensor(y_test.values, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>X_train_tensor <span class="op">=</span> torch.from_numpy(X_train.to_numpy().astype(<span class="bu">float</span>))</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>X_test_tensor <span class="op">=</span> torch.from_numpy(X_test.to_numpy().astype(<span class="bu">float</span>))</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>y_train_tensor <span class="op">=</span> torch.tensor(y_train.values, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>y_test_tensor <span class="op">=</span> torch.tensor(y_test.values, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="5db4e004" class="cell" data-execution_count="18">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>X_train_tensor <span class="op">=</span> X_train_tensor.double()</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>X_train_tensor</span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>y_train_tensor <span class="op">=</span> y_train_tensor.double()</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>X_test_tensor <span class="op">=</span> X_test_tensor.double()</span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>y_test_tensor <span class="op">=</span> y_test_tensor.double()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>X_train_tensor <span class="op">=</span> X_train_tensor.double()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>X_train_tensor</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>y_train_tensor <span class="op">=</span> y_train_tensor.double()</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>X_test_tensor <span class="op">=</span> X_test_tensor.double()</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>y_test_tensor <span class="op">=</span> y_test_tensor.double()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="b0b43300" class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>opt3 <span class="op">=</span> NewtonOptimizer()</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>loss_arr <span class="op">=</span> []</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>X_train</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="19">
-<div>
-
-
-<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th"></th>
-<th data-quarto-table-cell-role="th">Pclass</th>
-<th data-quarto-table-cell-role="th">Age</th>
-<th data-quarto-table-cell-role="th">SibSp</th>
-<th data-quarto-table-cell-role="th">Parch</th>
-<th data-quarto-table-cell-role="th">Fare</th>
-<th data-quarto-table-cell-role="th">Sex_female</th>
-<th data-quarto-table-cell-role="th">Sex_male</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">532</td>
-<td>3</td>
-<td>17.0</td>
-<td>1</td>
-<td>1</td>
-<td>7.2292</td>
-<td>False</td>
-<td>True</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">338</td>
-<td>3</td>
-<td>45.0</td>
-<td>0</td>
-<td>0</td>
-<td>8.0500</td>
-<td>False</td>
-<td>True</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">840</td>
-<td>3</td>
-<td>20.0</td>
-<td>0</td>
-<td>0</td>
-<td>7.9250</td>
-<td>False</td>
-<td>True</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">151</td>
-<td>1</td>
-<td>22.0</td>
-<td>1</td>
-<td>0</td>
-<td>66.6000</td>
-<td>True</td>
-<td>False</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">705</td>
-<td>2</td>
-<td>39.0</td>
-<td>0</td>
-<td>0</td>
-<td>26.0000</td>
-<td>False</td>
-<td>True</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">...</td>
-<td>...</td>
-<td>...</td>
-<td>...</td>
-<td>...</td>
-<td>...</td>
-<td>...</td>
-<td>...</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">146</td>
-<td>3</td>
-<td>27.0</td>
-<td>0</td>
-<td>0</td>
-<td>7.7958</td>
-<td>False</td>
-<td>True</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">155</td>
-<td>1</td>
-<td>51.0</td>
-<td>0</td>
-<td>1</td>
-<td>61.3792</td>
-<td>False</td>
-<td>True</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">285</td>
-<td>3</td>
-<td>33.0</td>
-<td>0</td>
-<td>0</td>
-<td>8.6625</td>
-<td>False</td>
-<td>True</td>
-</tr>
-<tr class="even">
-<td data-quarto-table-cell-role="th">881</td>
-<td>3</td>
-<td>33.0</td>
-<td>0</td>
-<td>0</td>
-<td>7.8958</td>
-<td>False</td>
-<td>True</td>
-</tr>
-<tr class="odd">
-<td data-quarto-table-cell-role="th">108</td>
-<td>3</td>
-<td>38.0</td>
-<td>0</td>
-<td>0</td>
-<td>7.8958</td>
-<td>False</td>
-<td>True</td>
-</tr>
-</tbody>
-</table>
-
-<p>571 rows × 7 columns</p>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>opt3 <span class="op">=</span> NewtonOptimizer()</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>loss_arr3 <span class="op">=</span> []</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div id="2599e8dc" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for _ in range(150):</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>newton_start_time <span class="op">=</span> time.time()</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> math.inf</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> loss <span class="op">&gt;=</span> <span class="dv">240</span> <span class="kw">or</span> torch.isnan(loss):</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> opt3.loss(X_train_tensor, y_train_tensor)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    loss_arr3.append(loss)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    opt3.step(X_train_tensor, y_train_tensor, alpha <span class="op">=</span> <span class="fl">0.001</span>)</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>newton_end_time <span class="op">=</span> time.time()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-<div id="eb82bbda" class="cell" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>opt3.w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="2599e8dc" class="cell" data-execution_count="21">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5000</span>):</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># add other stuff to e.g. keep track of the loss over time.</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> opt3.loss(X_train_tensor, y_train_tensor)</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>    loss_arr.append(loss)</span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>    opt3.step(X_train_tensor, y_train_tensor, alpha <span class="op">=</span> <span class="fl">0.25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="3d59b7e8" class="cell" data-execution_count="22">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>plt.plot(torch.arange(<span class="dv">1</span>, <span class="bu">len</span>(loss_arr)<span class="op">+</span><span class="dv">1</span>), loss_arr, color <span class="op">=</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="3d59b7e8" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>plt.plot(torch.arange(<span class="dv">1</span>, <span class="bu">len</span>(loss_arr3)<span class="op">+</span><span class="dv">1</span>), loss_arr3, color <span class="op">=</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/cell-26-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="index_files/figure-html/cell-22-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="62ade774" class="cell" data-execution_count="23">
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>plt.plot(loss_arr[<span class="dv">100</span>:])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="62ade774" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>plt.plot(loss_arr[<span class="dv">10</span>:])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/cell-27-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="index_files/figure-html/cell-23-output-1.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="9e583ee1" class="cell" data-execution_count="24">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>loss_arr[<span class="dv">2000</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="24">
-<pre><code>[tensor(310.5317, dtype=torch.float64),
- tensor(310.4860, dtype=torch.float64),
- tensor(310.4403, dtype=torch.float64),
- tensor(310.3947, dtype=torch.float64),
- tensor(310.3490, dtype=torch.float64),
- tensor(310.3035, dtype=torch.float64),
- tensor(310.2579, dtype=torch.float64),
- tensor(310.2125, dtype=torch.float64),
- tensor(310.1670, dtype=torch.float64),
- tensor(310.1216, dtype=torch.float64),
- tensor(310.0762, dtype=torch.float64),
- tensor(310.0309, dtype=torch.float64),
- tensor(309.9856, dtype=torch.float64),
- tensor(309.9404, dtype=torch.float64),
- tensor(309.8952, dtype=torch.float64),
- tensor(309.8501, dtype=torch.float64),
- tensor(309.8050, dtype=torch.float64),
- tensor(309.7599, dtype=torch.float64),
- tensor(309.7149, dtype=torch.float64),
- tensor(309.6699, dtype=torch.float64),
- tensor(309.6249, dtype=torch.float64),
- tensor(309.5800, dtype=torch.float64),
- tensor(309.5352, dtype=torch.float64),
- tensor(309.4904, dtype=torch.float64),
- tensor(309.4456, dtype=torch.float64),
- tensor(309.4008, dtype=torch.float64),
- tensor(309.3562, dtype=torch.float64),
- tensor(309.3115, dtype=torch.float64),
- tensor(309.2669, dtype=torch.float64),
- tensor(309.2223, dtype=torch.float64),
- tensor(309.1778, dtype=torch.float64),
- tensor(309.1333, dtype=torch.float64),
- tensor(309.0888, dtype=torch.float64),
- tensor(309.0444, dtype=torch.float64),
- tensor(309.0001, dtype=torch.float64),
- tensor(308.9557, dtype=torch.float64),
- tensor(308.9115, dtype=torch.float64),
- tensor(308.8672, dtype=torch.float64),
- tensor(308.8230, dtype=torch.float64),
- tensor(308.7788, dtype=torch.float64),
- tensor(308.7347, dtype=torch.float64),
- tensor(308.6906, dtype=torch.float64),
- tensor(308.6466, dtype=torch.float64),
- tensor(308.6026, dtype=torch.float64),
- tensor(308.5586, dtype=torch.float64),
- tensor(308.5147, dtype=torch.float64),
- tensor(308.4708, dtype=torch.float64),
- tensor(308.4270, dtype=torch.float64),
- tensor(308.3832, dtype=torch.float64),
- tensor(308.3394, dtype=torch.float64),
- tensor(308.2957, dtype=torch.float64),
- tensor(308.2520, dtype=torch.float64),
- tensor(308.2084, dtype=torch.float64),
- tensor(308.1648, dtype=torch.float64),
- tensor(308.1212, dtype=torch.float64),
- tensor(308.0777, dtype=torch.float64),
- tensor(308.0342, dtype=torch.float64),
- tensor(307.9908, dtype=torch.float64),
- tensor(307.9474, dtype=torch.float64),
- tensor(307.9040, dtype=torch.float64),
- tensor(307.8607, dtype=torch.float64),
- tensor(307.8174, dtype=torch.float64),
- tensor(307.7742, dtype=torch.float64),
- tensor(307.7310, dtype=torch.float64),
- tensor(307.6878, dtype=torch.float64),
- tensor(307.6447, dtype=torch.float64),
- tensor(307.6016, dtype=torch.float64),
- tensor(307.5586, dtype=torch.float64),
- tensor(307.5156, dtype=torch.float64),
- tensor(307.4726, dtype=torch.float64),
- tensor(307.4297, dtype=torch.float64),
- tensor(307.3868, dtype=torch.float64),
- tensor(307.3439, dtype=torch.float64),
- tensor(307.3011, dtype=torch.float64),
- tensor(307.2583, dtype=torch.float64),
- tensor(307.2156, dtype=torch.float64),
- tensor(307.1729, dtype=torch.float64),
- tensor(307.1303, dtype=torch.float64),
- tensor(307.0876, dtype=torch.float64),
- tensor(307.0451, dtype=torch.float64),
- tensor(307.0025, dtype=torch.float64),
- tensor(306.9600, dtype=torch.float64),
- tensor(306.9176, dtype=torch.float64),
- tensor(306.8751, dtype=torch.float64),
- tensor(306.8327, dtype=torch.float64),
- tensor(306.7904, dtype=torch.float64),
- tensor(306.7481, dtype=torch.float64),
- tensor(306.7058, dtype=torch.float64),
- tensor(306.6636, dtype=torch.float64),
- tensor(306.6214, dtype=torch.float64),
- tensor(306.5792, dtype=torch.float64),
- tensor(306.5371, dtype=torch.float64),
- tensor(306.4950, dtype=torch.float64),
- tensor(306.4530, dtype=torch.float64),
- tensor(306.4110, dtype=torch.float64),
- tensor(306.3690, dtype=torch.float64),
- tensor(306.3271, dtype=torch.float64),
- tensor(306.2852, dtype=torch.float64),
- tensor(306.2434, dtype=torch.float64),
- tensor(306.2015, dtype=torch.float64),
- tensor(306.1598, dtype=torch.float64),
- tensor(306.1180, dtype=torch.float64),
- tensor(306.0763, dtype=torch.float64),
- tensor(306.0347, dtype=torch.float64),
- tensor(305.9930, dtype=torch.float64),
- tensor(305.9514, dtype=torch.float64),
- tensor(305.9099, dtype=torch.float64),
- tensor(305.8684, dtype=torch.float64),
- tensor(305.8269, dtype=torch.float64),
- tensor(305.7855, dtype=torch.float64),
- tensor(305.7441, dtype=torch.float64),
- tensor(305.7027, dtype=torch.float64),
- tensor(305.6614, dtype=torch.float64),
- tensor(305.6201, dtype=torch.float64),
- tensor(305.5788, dtype=torch.float64),
- tensor(305.5376, dtype=torch.float64),
- tensor(305.4964, dtype=torch.float64),
- tensor(305.4553, dtype=torch.float64),
- tensor(305.4142, dtype=torch.float64),
- tensor(305.3731, dtype=torch.float64),
- tensor(305.3321, dtype=torch.float64),
- tensor(305.2911, dtype=torch.float64),
- tensor(305.2502, dtype=torch.float64),
- tensor(305.2092, dtype=torch.float64),
- tensor(305.1684, dtype=torch.float64),
- tensor(305.1275, dtype=torch.float64),
- tensor(305.0867, dtype=torch.float64),
- tensor(305.0459, dtype=torch.float64),
- tensor(305.0052, dtype=torch.float64),
- tensor(304.9645, dtype=torch.float64),
- tensor(304.9238, dtype=torch.float64),
- tensor(304.8832, dtype=torch.float64),
- tensor(304.8426, dtype=torch.float64),
- tensor(304.8020, dtype=torch.float64),
- tensor(304.7615, dtype=torch.float64),
- tensor(304.7210, dtype=torch.float64),
- tensor(304.6806, dtype=torch.float64),
- tensor(304.6402, dtype=torch.float64),
- tensor(304.5998, dtype=torch.float64),
- tensor(304.5595, dtype=torch.float64),
- tensor(304.5192, dtype=torch.float64),
- tensor(304.4789, dtype=torch.float64),
- tensor(304.4387, dtype=torch.float64),
- tensor(304.3985, dtype=torch.float64),
- tensor(304.3583, dtype=torch.float64),
- tensor(304.3182, dtype=torch.float64),
- tensor(304.2781, dtype=torch.float64),
- tensor(304.2381, dtype=torch.float64),
- tensor(304.1981, dtype=torch.float64),
- tensor(304.1581, dtype=torch.float64),
- tensor(304.1181, dtype=torch.float64),
- tensor(304.0782, dtype=torch.float64),
- tensor(304.0384, dtype=torch.float64),
- tensor(303.9985, dtype=torch.float64),
- tensor(303.9587, dtype=torch.float64),
- tensor(303.9190, dtype=torch.float64),
- tensor(303.8792, dtype=torch.float64),
- tensor(303.8395, dtype=torch.float64),
- tensor(303.7999, dtype=torch.float64),
- tensor(303.7603, dtype=torch.float64),
- tensor(303.7207, dtype=torch.float64),
- tensor(303.6811, dtype=torch.float64),
- tensor(303.6416, dtype=torch.float64),
- tensor(303.6021, dtype=torch.float64),
- tensor(303.5627, dtype=torch.float64),
- tensor(303.5232, dtype=torch.float64),
- tensor(303.4839, dtype=torch.float64),
- tensor(303.4445, dtype=torch.float64),
- tensor(303.4052, dtype=torch.float64),
- tensor(303.3659, dtype=torch.float64),
- tensor(303.3267, dtype=torch.float64),
- tensor(303.2875, dtype=torch.float64),
- tensor(303.2483, dtype=torch.float64),
- tensor(303.2092, dtype=torch.float64),
- tensor(303.1701, dtype=torch.float64),
- tensor(303.1310, dtype=torch.float64),
- tensor(303.0920, dtype=torch.float64),
- tensor(303.0530, dtype=torch.float64),
- tensor(303.0140, dtype=torch.float64),
- tensor(302.9751, dtype=torch.float64),
- tensor(302.9362, dtype=torch.float64),
- tensor(302.8974, dtype=torch.float64),
- tensor(302.8585, dtype=torch.float64),
- tensor(302.8198, dtype=torch.float64),
- tensor(302.7810, dtype=torch.float64),
- tensor(302.7423, dtype=torch.float64),
- tensor(302.7036, dtype=torch.float64),
- tensor(302.6649, dtype=torch.float64),
- tensor(302.6263, dtype=torch.float64),
- tensor(302.5877, dtype=torch.float64),
- tensor(302.5492, dtype=torch.float64),
- tensor(302.5107, dtype=torch.float64),
- tensor(302.4722, dtype=torch.float64),
- tensor(302.4337, dtype=torch.float64),
- tensor(302.3953, dtype=torch.float64),
- tensor(302.3569, dtype=torch.float64),
- tensor(302.3186, dtype=torch.float64),
- tensor(302.2803, dtype=torch.float64),
- tensor(302.2420, dtype=torch.float64),
- tensor(302.2038, dtype=torch.float64),
- tensor(302.1656, dtype=torch.float64),
- tensor(302.1274, dtype=torch.float64),
- tensor(302.0892, dtype=torch.float64),
- tensor(302.0511, dtype=torch.float64),
- tensor(302.0130, dtype=torch.float64),
- tensor(301.9750, dtype=torch.float64),
- tensor(301.9370, dtype=torch.float64),
- tensor(301.8990, dtype=torch.float64),
- tensor(301.8611, dtype=torch.float64),
- tensor(301.8232, dtype=torch.float64),
- tensor(301.7853, dtype=torch.float64),
- tensor(301.7474, dtype=torch.float64),
- tensor(301.7096, dtype=torch.float64),
- tensor(301.6719, dtype=torch.float64),
- tensor(301.6341, dtype=torch.float64),
- tensor(301.5964, dtype=torch.float64),
- tensor(301.5587, dtype=torch.float64),
- tensor(301.5211, dtype=torch.float64),
- tensor(301.4835, dtype=torch.float64),
- tensor(301.4459, dtype=torch.float64),
- tensor(301.4083, dtype=torch.float64),
- tensor(301.3708, dtype=torch.float64),
- tensor(301.3333, dtype=torch.float64),
- tensor(301.2959, dtype=torch.float64),
- tensor(301.2585, dtype=torch.float64),
- tensor(301.2211, dtype=torch.float64),
- tensor(301.1838, dtype=torch.float64),
- tensor(301.1464, dtype=torch.float64),
- tensor(301.1092, dtype=torch.float64),
- tensor(301.0719, dtype=torch.float64),
- tensor(301.0347, dtype=torch.float64),
- tensor(300.9975, dtype=torch.float64),
- tensor(300.9603, dtype=torch.float64),
- tensor(300.9232, dtype=torch.float64),
- tensor(300.8861, dtype=torch.float64),
- tensor(300.8491, dtype=torch.float64),
- tensor(300.8121, dtype=torch.float64),
- tensor(300.7751, dtype=torch.float64),
- tensor(300.7381, dtype=torch.float64),
- tensor(300.7012, dtype=torch.float64),
- tensor(300.6643, dtype=torch.float64),
- tensor(300.6274, dtype=torch.float64),
- tensor(300.5906, dtype=torch.float64),
- tensor(300.5538, dtype=torch.float64),
- tensor(300.5170, dtype=torch.float64),
- tensor(300.4803, dtype=torch.float64),
- tensor(300.4436, dtype=torch.float64),
- tensor(300.4069, dtype=torch.float64),
- tensor(300.3703, dtype=torch.float64),
- tensor(300.3337, dtype=torch.float64),
- tensor(300.2971, dtype=torch.float64),
- tensor(300.2606, dtype=torch.float64),
- tensor(300.2241, dtype=torch.float64),
- tensor(300.1876, dtype=torch.float64),
- tensor(300.1511, dtype=torch.float64),
- tensor(300.1147, dtype=torch.float64),
- tensor(300.0783, dtype=torch.float64),
- tensor(300.0420, dtype=torch.float64),
- tensor(300.0057, dtype=torch.float64),
- tensor(299.9694, dtype=torch.float64),
- tensor(299.9331, dtype=torch.float64),
- tensor(299.8969, dtype=torch.float64),
- tensor(299.8607, dtype=torch.float64),
- tensor(299.8245, dtype=torch.float64),
- tensor(299.7884, dtype=torch.float64),
- tensor(299.7523, dtype=torch.float64),
- tensor(299.7162, dtype=torch.float64),
- tensor(299.6802, dtype=torch.float64),
- tensor(299.6442, dtype=torch.float64),
- tensor(299.6082, dtype=torch.float64),
- tensor(299.5723, dtype=torch.float64),
- tensor(299.5363, dtype=torch.float64),
- tensor(299.5005, dtype=torch.float64),
- tensor(299.4646, dtype=torch.float64),
- tensor(299.4288, dtype=torch.float64),
- tensor(299.3930, dtype=torch.float64),
- tensor(299.3572, dtype=torch.float64),
- tensor(299.3215, dtype=torch.float64),
- tensor(299.2858, dtype=torch.float64),
- tensor(299.2502, dtype=torch.float64),
- tensor(299.2145, dtype=torch.float64),
- tensor(299.1789, dtype=torch.float64),
- tensor(299.1434, dtype=torch.float64),
- tensor(299.1078, dtype=torch.float64),
- tensor(299.0723, dtype=torch.float64),
- tensor(299.0368, dtype=torch.float64),
- tensor(299.0014, dtype=torch.float64),
- tensor(298.9659, dtype=torch.float64),
- tensor(298.9306, dtype=torch.float64),
- tensor(298.8952, dtype=torch.float64),
- tensor(298.8599, dtype=torch.float64),
- tensor(298.8246, dtype=torch.float64),
- tensor(298.7893, dtype=torch.float64),
- tensor(298.7541, dtype=torch.float64),
- tensor(298.7189, dtype=torch.float64),
- tensor(298.6837, dtype=torch.float64),
- tensor(298.6485, dtype=torch.float64),
- tensor(298.6134, dtype=torch.float64),
- tensor(298.5783, dtype=torch.float64),
- tensor(298.5433, dtype=torch.float64),
- tensor(298.5083, dtype=torch.float64),
- tensor(298.4733, dtype=torch.float64),
- tensor(298.4383, dtype=torch.float64),
- tensor(298.4034, dtype=torch.float64),
- tensor(298.3685, dtype=torch.float64),
- tensor(298.3336, dtype=torch.float64),
- tensor(298.2988, dtype=torch.float64),
- tensor(298.2639, dtype=torch.float64),
- tensor(298.2292, dtype=torch.float64),
- tensor(298.1944, dtype=torch.float64),
- tensor(298.1597, dtype=torch.float64),
- tensor(298.1250, dtype=torch.float64),
- tensor(298.0903, dtype=torch.float64),
- tensor(298.0557, dtype=torch.float64),
- tensor(298.0211, dtype=torch.float64),
- tensor(297.9865, dtype=torch.float64),
- tensor(297.9520, dtype=torch.float64),
- tensor(297.9174, dtype=torch.float64),
- tensor(297.8830, dtype=torch.float64),
- tensor(297.8485, dtype=torch.float64),
- tensor(297.8141, dtype=torch.float64),
- tensor(297.7797, dtype=torch.float64),
- tensor(297.7453, dtype=torch.float64),
- tensor(297.7110, dtype=torch.float64),
- tensor(297.6767, dtype=torch.float64),
- tensor(297.6424, dtype=torch.float64),
- tensor(297.6081, dtype=torch.float64),
- tensor(297.5739, dtype=torch.float64),
- tensor(297.5397, dtype=torch.float64),
- tensor(297.5056, dtype=torch.float64),
- tensor(297.4714, dtype=torch.float64),
- tensor(297.4373, dtype=torch.float64),
- tensor(297.4032, dtype=torch.float64),
- tensor(297.3692, dtype=torch.float64),
- tensor(297.3352, dtype=torch.float64),
- tensor(297.3012, dtype=torch.float64),
- tensor(297.2672, dtype=torch.float64),
- tensor(297.2333, dtype=torch.float64),
- tensor(297.1994, dtype=torch.float64),
- tensor(297.1655, dtype=torch.float64),
- tensor(297.1317, dtype=torch.float64),
- tensor(297.0979, dtype=torch.float64),
- tensor(297.0641, dtype=torch.float64),
- tensor(297.0303, dtype=torch.float64),
- tensor(296.9966, dtype=torch.float64),
- tensor(296.9629, dtype=torch.float64),
- tensor(296.9292, dtype=torch.float64),
- tensor(296.8956, dtype=torch.float64),
- tensor(296.8620, dtype=torch.float64),
- tensor(296.8284, dtype=torch.float64),
- tensor(296.7948, dtype=torch.float64),
- tensor(296.7613, dtype=torch.float64),
- tensor(296.7278, dtype=torch.float64),
- tensor(296.6943, dtype=torch.float64),
- tensor(296.6609, dtype=torch.float64),
- tensor(296.6275, dtype=torch.float64),
- tensor(296.5941, dtype=torch.float64),
- tensor(296.5608, dtype=torch.float64),
- tensor(296.5274, dtype=torch.float64),
- tensor(296.4941, dtype=torch.float64),
- tensor(296.4609, dtype=torch.float64),
- tensor(296.4276, dtype=torch.float64),
- tensor(296.3944, dtype=torch.float64),
- tensor(296.3612, dtype=torch.float64),
- tensor(296.3281, dtype=torch.float64),
- tensor(296.2949, dtype=torch.float64),
- tensor(296.2618, dtype=torch.float64),
- tensor(296.2288, dtype=torch.float64),
- tensor(296.1957, dtype=torch.float64),
- tensor(296.1627, dtype=torch.float64),
- tensor(296.1297, dtype=torch.float64),
- tensor(296.0967, dtype=torch.float64),
- tensor(296.0638, dtype=torch.float64),
- tensor(296.0309, dtype=torch.float64),
- tensor(295.9980, dtype=torch.float64),
- tensor(295.9652, dtype=torch.float64),
- tensor(295.9324, dtype=torch.float64),
- tensor(295.8996, dtype=torch.float64),
- tensor(295.8668, dtype=torch.float64),
- tensor(295.8341, dtype=torch.float64),
- tensor(295.8013, dtype=torch.float64),
- tensor(295.7687, dtype=torch.float64),
- tensor(295.7360, dtype=torch.float64),
- tensor(295.7034, dtype=torch.float64),
- tensor(295.6708, dtype=torch.float64),
- tensor(295.6382, dtype=torch.float64),
- tensor(295.6057, dtype=torch.float64),
- tensor(295.5731, dtype=torch.float64),
- tensor(295.5407, dtype=torch.float64),
- tensor(295.5082, dtype=torch.float64),
- tensor(295.4758, dtype=torch.float64),
- tensor(295.4434, dtype=torch.float64),
- tensor(295.4110, dtype=torch.float64),
- tensor(295.3786, dtype=torch.float64),
- tensor(295.3463, dtype=torch.float64),
- tensor(295.3140, dtype=torch.float64),
- tensor(295.2817, dtype=torch.float64),
- tensor(295.2495, dtype=torch.float64),
- tensor(295.2173, dtype=torch.float64),
- tensor(295.1851, dtype=torch.float64),
- tensor(295.1529, dtype=torch.float64),
- tensor(295.1208, dtype=torch.float64),
- tensor(295.0887, dtype=torch.float64),
- tensor(295.0566, dtype=torch.float64),
- tensor(295.0245, dtype=torch.float64),
- tensor(294.9925, dtype=torch.float64),
- tensor(294.9605, dtype=torch.float64),
- tensor(294.9285, dtype=torch.float64),
- tensor(294.8966, dtype=torch.float64),
- tensor(294.8647, dtype=torch.float64),
- tensor(294.8328, dtype=torch.float64),
- tensor(294.8009, dtype=torch.float64),
- tensor(294.7691, dtype=torch.float64),
- tensor(294.7373, dtype=torch.float64),
- tensor(294.7055, dtype=torch.float64),
- tensor(294.6737, dtype=torch.float64),
- tensor(294.6420, dtype=torch.float64),
- tensor(294.6103, dtype=torch.float64),
- tensor(294.5786, dtype=torch.float64),
- tensor(294.5470, dtype=torch.float64),
- tensor(294.5154, dtype=torch.float64),
- tensor(294.4838, dtype=torch.float64),
- tensor(294.4522, dtype=torch.float64),
- tensor(294.4206, dtype=torch.float64),
- tensor(294.3891, dtype=torch.float64),
- tensor(294.3576, dtype=torch.float64),
- tensor(294.3262, dtype=torch.float64),
- tensor(294.2947, dtype=torch.float64),
- tensor(294.2633, dtype=torch.float64),
- tensor(294.2319, dtype=torch.float64),
- tensor(294.2006, dtype=torch.float64),
- tensor(294.1692, dtype=torch.float64),
- tensor(294.1379, dtype=torch.float64),
- tensor(294.1067, dtype=torch.float64),
- tensor(294.0754, dtype=torch.float64),
- tensor(294.0442, dtype=torch.float64),
- tensor(294.0130, dtype=torch.float64),
- tensor(293.9818, dtype=torch.float64),
- tensor(293.9506, dtype=torch.float64),
- tensor(293.9195, dtype=torch.float64),
- tensor(293.8884, dtype=torch.float64),
- tensor(293.8574, dtype=torch.float64),
- tensor(293.8263, dtype=torch.float64),
- tensor(293.7953, dtype=torch.float64),
- tensor(293.7643, dtype=torch.float64),
- tensor(293.7333, dtype=torch.float64),
- tensor(293.7024, dtype=torch.float64),
- tensor(293.6715, dtype=torch.float64),
- tensor(293.6406, dtype=torch.float64),
- tensor(293.6097, dtype=torch.float64),
- tensor(293.5789, dtype=torch.float64),
- tensor(293.5481, dtype=torch.float64),
- tensor(293.5173, dtype=torch.float64),
- tensor(293.4865, dtype=torch.float64),
- tensor(293.4558, dtype=torch.float64),
- tensor(293.4251, dtype=torch.float64),
- tensor(293.3944, dtype=torch.float64),
- tensor(293.3637, dtype=torch.float64),
- tensor(293.3331, dtype=torch.float64),
- tensor(293.3025, dtype=torch.float64),
- tensor(293.2719, dtype=torch.float64),
- tensor(293.2414, dtype=torch.float64),
- tensor(293.2108, dtype=torch.float64),
- tensor(293.1803, dtype=torch.float64),
- tensor(293.1498, dtype=torch.float64),
- tensor(293.1194, dtype=torch.float64),
- tensor(293.0890, dtype=torch.float64),
- tensor(293.0586, dtype=torch.float64),
- tensor(293.0282, dtype=torch.float64),
- tensor(292.9978, dtype=torch.float64),
- tensor(292.9675, dtype=torch.float64),
- tensor(292.9372, dtype=torch.float64),
- tensor(292.9069, dtype=torch.float64),
- tensor(292.8767, dtype=torch.float64),
- tensor(292.8464, dtype=torch.float64),
- tensor(292.8162, dtype=torch.float64),
- tensor(292.7861, dtype=torch.float64),
- tensor(292.7559, dtype=torch.float64),
- tensor(292.7258, dtype=torch.float64),
- tensor(292.6957, dtype=torch.float64),
- tensor(292.6656, dtype=torch.float64),
- tensor(292.6356, dtype=torch.float64),
- tensor(292.6055, dtype=torch.float64),
- tensor(292.5755, dtype=torch.float64),
- tensor(292.5456, dtype=torch.float64),
- tensor(292.5156, dtype=torch.float64),
- tensor(292.4857, dtype=torch.float64),
- tensor(292.4558, dtype=torch.float64),
- tensor(292.4259, dtype=torch.float64),
- tensor(292.3961, dtype=torch.float64),
- tensor(292.3662, dtype=torch.float64),
- tensor(292.3364, dtype=torch.float64),
- tensor(292.3067, dtype=torch.float64),
- tensor(292.2769, dtype=torch.float64),
- tensor(292.2472, dtype=torch.float64),
- tensor(292.2175, dtype=torch.float64),
- tensor(292.1878, dtype=torch.float64),
- tensor(292.1581, dtype=torch.float64),
- tensor(292.1285, dtype=torch.float64),
- tensor(292.0989, dtype=torch.float64),
- tensor(292.0693, dtype=torch.float64),
- tensor(292.0398, dtype=torch.float64),
- tensor(292.0102, dtype=torch.float64),
- tensor(291.9807, dtype=torch.float64),
- tensor(291.9512, dtype=torch.float64),
- tensor(291.9218, dtype=torch.float64),
- tensor(291.8924, dtype=torch.float64),
- tensor(291.8629, dtype=torch.float64),
- tensor(291.8336, dtype=torch.float64),
- tensor(291.8042, dtype=torch.float64),
- tensor(291.7749, dtype=torch.float64),
- tensor(291.7456, dtype=torch.float64),
- tensor(291.7163, dtype=torch.float64),
- tensor(291.6870, dtype=torch.float64),
- tensor(291.6578, dtype=torch.float64),
- tensor(291.6286, dtype=torch.float64),
- tensor(291.5994, dtype=torch.float64),
- tensor(291.5702, dtype=torch.float64),
- tensor(291.5411, dtype=torch.float64),
- tensor(291.5119, dtype=torch.float64),
- tensor(291.4828, dtype=torch.float64),
- tensor(291.4538, dtype=torch.float64),
- tensor(291.4247, dtype=torch.float64),
- tensor(291.3957, dtype=torch.float64),
- tensor(291.3667, dtype=torch.float64),
- tensor(291.3377, dtype=torch.float64),
- tensor(291.3088, dtype=torch.float64),
- tensor(291.2799, dtype=torch.float64),
- tensor(291.2510, dtype=torch.float64),
- tensor(291.2221, dtype=torch.float64),
- tensor(291.1932, dtype=torch.float64),
- tensor(291.1644, dtype=torch.float64),
- tensor(291.1356, dtype=torch.float64),
- tensor(291.1068, dtype=torch.float64),
- tensor(291.0780, dtype=torch.float64),
- tensor(291.0493, dtype=torch.float64),
- tensor(291.0206, dtype=torch.float64),
- tensor(290.9919, dtype=torch.float64),
- tensor(290.9632, dtype=torch.float64),
- tensor(290.9346, dtype=torch.float64),
- tensor(290.9060, dtype=torch.float64),
- tensor(290.8774, dtype=torch.float64),
- tensor(290.8488, dtype=torch.float64),
- tensor(290.8203, dtype=torch.float64),
- tensor(290.7917, dtype=torch.float64),
- tensor(290.7632, dtype=torch.float64),
- tensor(290.7348, dtype=torch.float64),
- tensor(290.7063, dtype=torch.float64),
- tensor(290.6779, dtype=torch.float64),
- tensor(290.6495, dtype=torch.float64),
- tensor(290.6211, dtype=torch.float64),
- tensor(290.5927, dtype=torch.float64),
- tensor(290.5644, dtype=torch.float64),
- tensor(290.5361, dtype=torch.float64),
- tensor(290.5078, dtype=torch.float64),
- tensor(290.4795, dtype=torch.float64),
- tensor(290.4513, dtype=torch.float64),
- tensor(290.4231, dtype=torch.float64),
- tensor(290.3949, dtype=torch.float64),
- tensor(290.3667, dtype=torch.float64),
- tensor(290.3385, dtype=torch.float64),
- tensor(290.3104, dtype=torch.float64),
- tensor(290.2823, dtype=torch.float64),
- tensor(290.2542, dtype=torch.float64),
- tensor(290.2262, dtype=torch.float64),
- tensor(290.1981, dtype=torch.float64),
- tensor(290.1701, dtype=torch.float64),
- tensor(290.1421, dtype=torch.float64),
- tensor(290.1142, dtype=torch.float64),
- tensor(290.0862, dtype=torch.float64),
- tensor(290.0583, dtype=torch.float64),
- tensor(290.0304, dtype=torch.float64),
- tensor(290.0025, dtype=torch.float64),
- tensor(289.9747, dtype=torch.float64),
- tensor(289.9469, dtype=torch.float64),
- tensor(289.9191, dtype=torch.float64),
- tensor(289.8913, dtype=torch.float64),
- tensor(289.8635, dtype=torch.float64),
- tensor(289.8358, dtype=torch.float64),
- tensor(289.8081, dtype=torch.float64),
- tensor(289.7804, dtype=torch.float64),
- tensor(289.7527, dtype=torch.float64),
- tensor(289.7250, dtype=torch.float64),
- tensor(289.6974, dtype=torch.float64),
- tensor(289.6698, dtype=torch.float64),
- tensor(289.6422, dtype=torch.float64),
- tensor(289.6147, dtype=torch.float64),
- tensor(289.5871, dtype=torch.float64),
- tensor(289.5596, dtype=torch.float64),
- tensor(289.5321, dtype=torch.float64),
- tensor(289.5047, dtype=torch.float64),
- tensor(289.4772, dtype=torch.float64),
- tensor(289.4498, dtype=torch.float64),
- tensor(289.4224, dtype=torch.float64),
- tensor(289.3950, dtype=torch.float64),
- tensor(289.3677, dtype=torch.float64),
- tensor(289.3404, dtype=torch.float64),
- tensor(289.3130, dtype=torch.float64),
- tensor(289.2858, dtype=torch.float64),
- tensor(289.2585, dtype=torch.float64),
- tensor(289.2312, dtype=torch.float64),
- tensor(289.2040, dtype=torch.float64),
- tensor(289.1768, dtype=torch.float64),
- tensor(289.1496, dtype=torch.float64),
- tensor(289.1225, dtype=torch.float64),
- tensor(289.0954, dtype=torch.float64),
- tensor(289.0683, dtype=torch.float64),
- tensor(289.0412, dtype=torch.float64),
- tensor(289.0141, dtype=torch.float64),
- tensor(288.9871, dtype=torch.float64),
- tensor(288.9600, dtype=torch.float64),
- tensor(288.9330, dtype=torch.float64),
- tensor(288.9061, dtype=torch.float64),
- tensor(288.8791, dtype=torch.float64),
- tensor(288.8522, dtype=torch.float64),
- tensor(288.8253, dtype=torch.float64),
- tensor(288.7984, dtype=torch.float64),
- tensor(288.7715, dtype=torch.float64),
- tensor(288.7446, dtype=torch.float64),
- tensor(288.7178, dtype=torch.float64),
- tensor(288.6910, dtype=torch.float64),
- tensor(288.6642, dtype=torch.float64),
- tensor(288.6375, dtype=torch.float64),
- tensor(288.6107, dtype=torch.float64),
- tensor(288.5840, dtype=torch.float64),
- tensor(288.5573, dtype=torch.float64),
- tensor(288.5307, dtype=torch.float64),
- tensor(288.5040, dtype=torch.float64),
- tensor(288.4774, dtype=torch.float64),
- tensor(288.4508, dtype=torch.float64),
- tensor(288.4242, dtype=torch.float64),
- tensor(288.3976, dtype=torch.float64),
- tensor(288.3711, dtype=torch.float64),
- tensor(288.3446, dtype=torch.float64),
- tensor(288.3181, dtype=torch.float64),
- tensor(288.2916, dtype=torch.float64),
- tensor(288.2651, dtype=torch.float64),
- tensor(288.2387, dtype=torch.float64),
- tensor(288.2123, dtype=torch.float64),
- tensor(288.1859, dtype=torch.float64),
- tensor(288.1595, dtype=torch.float64),
- tensor(288.1332, dtype=torch.float64),
- tensor(288.1068, dtype=torch.float64),
- tensor(288.0805, dtype=torch.float64),
- tensor(288.0543, dtype=torch.float64),
- tensor(288.0280, dtype=torch.float64),
- tensor(288.0018, dtype=torch.float64),
- tensor(287.9755, dtype=torch.float64),
- tensor(287.9493, dtype=torch.float64),
- tensor(287.9232, dtype=torch.float64),
- tensor(287.8970, dtype=torch.float64),
- tensor(287.8709, dtype=torch.float64),
- tensor(287.8447, dtype=torch.float64),
- tensor(287.8187, dtype=torch.float64),
- tensor(287.7926, dtype=torch.float64),
- tensor(287.7665, dtype=torch.float64),
- tensor(287.7405, dtype=torch.float64),
- tensor(287.7145, dtype=torch.float64),
- tensor(287.6885, dtype=torch.float64),
- tensor(287.6625, dtype=torch.float64),
- tensor(287.6366, dtype=torch.float64),
- tensor(287.6107, dtype=torch.float64),
- tensor(287.5848, dtype=torch.float64),
- tensor(287.5589, dtype=torch.float64),
- tensor(287.5330, dtype=torch.float64),
- tensor(287.5072, dtype=torch.float64),
- tensor(287.4814, dtype=torch.float64),
- tensor(287.4556, dtype=torch.float64),
- tensor(287.4298, dtype=torch.float64),
- tensor(287.4040, dtype=torch.float64),
- tensor(287.3783, dtype=torch.float64),
- tensor(287.3526, dtype=torch.float64),
- tensor(287.3269, dtype=torch.float64),
- tensor(287.3012, dtype=torch.float64),
- tensor(287.2755, dtype=torch.float64),
- tensor(287.2499, dtype=torch.float64),
- tensor(287.2243, dtype=torch.float64),
- tensor(287.1987, dtype=torch.float64),
- tensor(287.1731, dtype=torch.float64),
- tensor(287.1476, dtype=torch.float64),
- tensor(287.1221, dtype=torch.float64),
- tensor(287.0965, dtype=torch.float64),
- tensor(287.0711, dtype=torch.float64),
- tensor(287.0456, dtype=torch.float64),
- tensor(287.0201, dtype=torch.float64),
- tensor(286.9947, dtype=torch.float64),
- tensor(286.9693, dtype=torch.float64),
- tensor(286.9439, dtype=torch.float64),
- tensor(286.9186, dtype=torch.float64),
- tensor(286.8932, dtype=torch.float64),
- tensor(286.8679, dtype=torch.float64),
- tensor(286.8426, dtype=torch.float64),
- tensor(286.8173, dtype=torch.float64),
- tensor(286.7920, dtype=torch.float64),
- tensor(286.7668, dtype=torch.float64),
- tensor(286.7416, dtype=torch.float64),
- tensor(286.7164, dtype=torch.float64),
- tensor(286.6912, dtype=torch.float64),
- tensor(286.6660, dtype=torch.float64),
- tensor(286.6409, dtype=torch.float64),
- tensor(286.6158, dtype=torch.float64),
- tensor(286.5907, dtype=torch.float64),
- tensor(286.5656, dtype=torch.float64),
- tensor(286.5405, dtype=torch.float64),
- tensor(286.5155, dtype=torch.float64),
- tensor(286.4905, dtype=torch.float64),
- tensor(286.4655, dtype=torch.float64),
- tensor(286.4405, dtype=torch.float64),
- tensor(286.4155, dtype=torch.float64),
- tensor(286.3906, dtype=torch.float64),
- tensor(286.3657, dtype=torch.float64),
- tensor(286.3408, dtype=torch.float64),
- tensor(286.3159, dtype=torch.float64),
- tensor(286.2910, dtype=torch.float64),
- tensor(286.2662, dtype=torch.float64),
- tensor(286.2414, dtype=torch.float64),
- tensor(286.2166, dtype=torch.float64),
- tensor(286.1918, dtype=torch.float64),
- tensor(286.1670, dtype=torch.float64),
- tensor(286.1423, dtype=torch.float64),
- tensor(286.1176, dtype=torch.float64),
- tensor(286.0929, dtype=torch.float64),
- tensor(286.0682, dtype=torch.float64),
- tensor(286.0435, dtype=torch.float64),
- tensor(286.0189, dtype=torch.float64),
- tensor(285.9942, dtype=torch.float64),
- tensor(285.9696, dtype=torch.float64),
- tensor(285.9451, dtype=torch.float64),
- tensor(285.9205, dtype=torch.float64),
- tensor(285.8960, dtype=torch.float64),
- tensor(285.8714, dtype=torch.float64),
- tensor(285.8469, dtype=torch.float64),
- tensor(285.8225, dtype=torch.float64),
- tensor(285.7980, dtype=torch.float64),
- tensor(285.7735, dtype=torch.float64),
- tensor(285.7491, dtype=torch.float64),
- tensor(285.7247, dtype=torch.float64),
- tensor(285.7003, dtype=torch.float64),
- tensor(285.6760, dtype=torch.float64),
- tensor(285.6516, dtype=torch.float64),
- tensor(285.6273, dtype=torch.float64),
- tensor(285.6030, dtype=torch.float64),
- tensor(285.5787, dtype=torch.float64),
- tensor(285.5544, dtype=torch.float64),
- tensor(285.5302, dtype=torch.float64),
- tensor(285.5059, dtype=torch.float64),
- tensor(285.4817, dtype=torch.float64),
- tensor(285.4575, dtype=torch.float64),
- tensor(285.4334, dtype=torch.float64),
- tensor(285.4092, dtype=torch.float64),
- tensor(285.3851, dtype=torch.float64),
- tensor(285.3610, dtype=torch.float64),
- tensor(285.3369, dtype=torch.float64),
- tensor(285.3128, dtype=torch.float64),
- tensor(285.2887, dtype=torch.float64),
- tensor(285.2647, dtype=torch.float64),
- tensor(285.2407, dtype=torch.float64),
- tensor(285.2167, dtype=torch.float64),
- tensor(285.1927, dtype=torch.float64),
- tensor(285.1688, dtype=torch.float64),
- tensor(285.1448, dtype=torch.float64),
- tensor(285.1209, dtype=torch.float64),
- tensor(285.0970, dtype=torch.float64),
- tensor(285.0731, dtype=torch.float64),
- tensor(285.0492, dtype=torch.float64),
- tensor(285.0254, dtype=torch.float64),
- tensor(285.0016, dtype=torch.float64),
- tensor(284.9778, dtype=torch.float64),
- tensor(284.9540, dtype=torch.float64),
- tensor(284.9302, dtype=torch.float64),
- tensor(284.9065, dtype=torch.float64),
- tensor(284.8827, dtype=torch.float64),
- tensor(284.8590, dtype=torch.float64),
- tensor(284.8353, dtype=torch.float64),
- tensor(284.8116, dtype=torch.float64),
- tensor(284.7880, dtype=torch.float64),
- tensor(284.7644, dtype=torch.float64),
- tensor(284.7407, dtype=torch.float64),
- tensor(284.7171, dtype=torch.float64),
- tensor(284.6936, dtype=torch.float64),
- tensor(284.6700, dtype=torch.float64),
- tensor(284.6465, dtype=torch.float64),
- tensor(284.6229, dtype=torch.float64),
- tensor(284.5994, dtype=torch.float64),
- tensor(284.5759, dtype=torch.float64),
- tensor(284.5525, dtype=torch.float64),
- tensor(284.5290, dtype=torch.float64),
- tensor(284.5056, dtype=torch.float64),
- tensor(284.4822, dtype=torch.float64),
- tensor(284.4588, dtype=torch.float64),
- tensor(284.4354, dtype=torch.float64),
- tensor(284.4121, dtype=torch.float64),
- tensor(284.3887, dtype=torch.float64),
- tensor(284.3654, dtype=torch.float64),
- tensor(284.3421, dtype=torch.float64),
- tensor(284.3188, dtype=torch.float64),
- tensor(284.2956, dtype=torch.float64),
- tensor(284.2723, dtype=torch.float64),
- tensor(284.2491, dtype=torch.float64),
- tensor(284.2259, dtype=torch.float64),
- tensor(284.2027, dtype=torch.float64),
- tensor(284.1795, dtype=torch.float64),
- tensor(284.1564, dtype=torch.float64),
- tensor(284.1332, dtype=torch.float64),
- tensor(284.1101, dtype=torch.float64),
- tensor(284.0870, dtype=torch.float64),
- tensor(284.0639, dtype=torch.float64),
- tensor(284.0409, dtype=torch.float64),
- tensor(284.0178, dtype=torch.float64),
- tensor(283.9948, dtype=torch.float64),
- tensor(283.9718, dtype=torch.float64),
- tensor(283.9488, dtype=torch.float64),
- tensor(283.9259, dtype=torch.float64),
- tensor(283.9029, dtype=torch.float64),
- tensor(283.8800, dtype=torch.float64),
- tensor(283.8571, dtype=torch.float64),
- tensor(283.8342, dtype=torch.float64),
- tensor(283.8113, dtype=torch.float64),
- tensor(283.7884, dtype=torch.float64),
- tensor(283.7656, dtype=torch.float64),
- tensor(283.7428, dtype=torch.float64),
- tensor(283.7200, dtype=torch.float64),
- tensor(283.6972, dtype=torch.float64),
- tensor(283.6744, dtype=torch.float64),
- tensor(283.6517, dtype=torch.float64),
- tensor(283.6289, dtype=torch.float64),
- tensor(283.6062, dtype=torch.float64),
- tensor(283.5835, dtype=torch.float64),
- tensor(283.5608, dtype=torch.float64),
- tensor(283.5382, dtype=torch.float64),
- tensor(283.5155, dtype=torch.float64),
- tensor(283.4929, dtype=torch.float64),
- tensor(283.4703, dtype=torch.float64),
- tensor(283.4477, dtype=torch.float64),
- tensor(283.4251, dtype=torch.float64),
- tensor(283.4026, dtype=torch.float64),
- tensor(283.3800, dtype=torch.float64),
- tensor(283.3575, dtype=torch.float64),
- tensor(283.3350, dtype=torch.float64),
- tensor(283.3125, dtype=torch.float64),
- tensor(283.2901, dtype=torch.float64),
- tensor(283.2676, dtype=torch.float64),
- tensor(283.2452, dtype=torch.float64),
- tensor(283.2228, dtype=torch.float64),
- tensor(283.2004, dtype=torch.float64),
- tensor(283.1780, dtype=torch.float64),
- tensor(283.1557, dtype=torch.float64),
- tensor(283.1333, dtype=torch.float64),
- tensor(283.1110, dtype=torch.float64),
- tensor(283.0887, dtype=torch.float64),
- tensor(283.0664, dtype=torch.float64),
- tensor(283.0441, dtype=torch.float64),
- tensor(283.0219, dtype=torch.float64),
- tensor(282.9997, dtype=torch.float64),
- tensor(282.9774, dtype=torch.float64),
- tensor(282.9552, dtype=torch.float64),
- tensor(282.9331, dtype=torch.float64),
- tensor(282.9109, dtype=torch.float64),
- tensor(282.8888, dtype=torch.float64),
- tensor(282.8666, dtype=torch.float64),
- tensor(282.8445, dtype=torch.float64),
- tensor(282.8224, dtype=torch.float64),
- tensor(282.8003, dtype=torch.float64),
- tensor(282.7783, dtype=torch.float64),
- tensor(282.7562, dtype=torch.float64),
- tensor(282.7342, dtype=torch.float64),
- tensor(282.7122, dtype=torch.float64),
- tensor(282.6902, dtype=torch.float64),
- tensor(282.6683, dtype=torch.float64),
- tensor(282.6463, dtype=torch.float64),
- tensor(282.6244, dtype=torch.float64),
- tensor(282.6024, dtype=torch.float64),
- tensor(282.5805, dtype=torch.float64),
- tensor(282.5587, dtype=torch.float64),
- tensor(282.5368, dtype=torch.float64),
- tensor(282.5149, dtype=torch.float64),
- tensor(282.4931, dtype=torch.float64),
- tensor(282.4713, dtype=torch.float64),
- tensor(282.4495, dtype=torch.float64),
- tensor(282.4277, dtype=torch.float64),
- tensor(282.4059, dtype=torch.float64),
- tensor(282.3842, dtype=torch.float64),
- tensor(282.3625, dtype=torch.float64),
- tensor(282.3407, dtype=torch.float64),
- tensor(282.3191, dtype=torch.float64),
- tensor(282.2974, dtype=torch.float64),
- tensor(282.2757, dtype=torch.float64),
- tensor(282.2541, dtype=torch.float64),
- tensor(282.2324, dtype=torch.float64),
- tensor(282.2108, dtype=torch.float64),
- tensor(282.1892, dtype=torch.float64),
- tensor(282.1677, dtype=torch.float64),
- tensor(282.1461, dtype=torch.float64),
- tensor(282.1246, dtype=torch.float64),
- tensor(282.1030, dtype=torch.float64),
- tensor(282.0815, dtype=torch.float64),
- tensor(282.0600, dtype=torch.float64),
- tensor(282.0386, dtype=torch.float64),
- tensor(282.0171, dtype=torch.float64),
- tensor(281.9957, dtype=torch.float64),
- tensor(281.9742, dtype=torch.float64),
- tensor(281.9528, dtype=torch.float64),
- tensor(281.9314, dtype=torch.float64),
- tensor(281.9101, dtype=torch.float64),
- tensor(281.8887, dtype=torch.float64),
- tensor(281.8674, dtype=torch.float64),
- tensor(281.8460, dtype=torch.float64),
- tensor(281.8247, dtype=torch.float64),
- tensor(281.8034, dtype=torch.float64),
- tensor(281.7822, dtype=torch.float64),
- tensor(281.7609, dtype=torch.float64),
- tensor(281.7397, dtype=torch.float64),
- tensor(281.7184, dtype=torch.float64),
- tensor(281.6972, dtype=torch.float64),
- tensor(281.6760, dtype=torch.float64),
- tensor(281.6549, dtype=torch.float64),
- tensor(281.6337, dtype=torch.float64),
- tensor(281.6126, dtype=torch.float64),
- tensor(281.5915, dtype=torch.float64),
- tensor(281.5703, dtype=torch.float64),
- tensor(281.5493, dtype=torch.float64),
- tensor(281.5282, dtype=torch.float64),
- tensor(281.5071, dtype=torch.float64),
- tensor(281.4861, dtype=torch.float64),
- tensor(281.4651, dtype=torch.float64),
- tensor(281.4441, dtype=torch.float64),
- tensor(281.4231, dtype=torch.float64),
- tensor(281.4021, dtype=torch.float64),
- tensor(281.3811, dtype=torch.float64),
- tensor(281.3602, dtype=torch.float64),
- tensor(281.3393, dtype=torch.float64),
- tensor(281.3184, dtype=torch.float64),
- tensor(281.2975, dtype=torch.float64),
- tensor(281.2766, dtype=torch.float64),
- tensor(281.2557, dtype=torch.float64),
- tensor(281.2349, dtype=torch.float64),
- tensor(281.2141, dtype=torch.float64),
- tensor(281.1933, dtype=torch.float64),
- tensor(281.1725, dtype=torch.float64),
- tensor(281.1517, dtype=torch.float64),
- tensor(281.1309, dtype=torch.float64),
- tensor(281.1102, dtype=torch.float64),
- tensor(281.0894, dtype=torch.float64),
- tensor(281.0687, dtype=torch.float64),
- tensor(281.0480, dtype=torch.float64),
- tensor(281.0274, dtype=torch.float64),
- tensor(281.0067, dtype=torch.float64),
- tensor(280.9860, dtype=torch.float64),
- tensor(280.9654, dtype=torch.float64),
- tensor(280.9448, dtype=torch.float64),
- tensor(280.9242, dtype=torch.float64),
- tensor(280.9036, dtype=torch.float64),
- tensor(280.8830, dtype=torch.float64),
- tensor(280.8625, dtype=torch.float64),
- tensor(280.8420, dtype=torch.float64),
- tensor(280.8214, dtype=torch.float64),
- tensor(280.8009, dtype=torch.float64),
- tensor(280.7805, dtype=torch.float64),
- tensor(280.7600, dtype=torch.float64),
- tensor(280.7395, dtype=torch.float64),
- tensor(280.7191, dtype=torch.float64),
- tensor(280.6987, dtype=torch.float64),
- tensor(280.6783, dtype=torch.float64),
- tensor(280.6579, dtype=torch.float64),
- tensor(280.6375, dtype=torch.float64),
- tensor(280.6171, dtype=torch.float64),
- tensor(280.5968, dtype=torch.float64),
- tensor(280.5765, dtype=torch.float64),
- tensor(280.5562, dtype=torch.float64),
- tensor(280.5359, dtype=torch.float64),
- tensor(280.5156, dtype=torch.float64),
- tensor(280.4953, dtype=torch.float64),
- tensor(280.4751, dtype=torch.float64),
- tensor(280.4548, dtype=torch.float64),
- tensor(280.4346, dtype=torch.float64),
- tensor(280.4144, dtype=torch.float64),
- tensor(280.3942, dtype=torch.float64),
- tensor(280.3741, dtype=torch.float64),
- tensor(280.3539, dtype=torch.float64),
- tensor(280.3338, dtype=torch.float64),
- tensor(280.3137, dtype=torch.float64),
- tensor(280.2936, dtype=torch.float64),
- tensor(280.2735, dtype=torch.float64),
- tensor(280.2534, dtype=torch.float64),
- tensor(280.2333, dtype=torch.float64),
- tensor(280.2133, dtype=torch.float64),
- tensor(280.1933, dtype=torch.float64),
- tensor(280.1732, dtype=torch.float64),
- tensor(280.1533, dtype=torch.float64),
- tensor(280.1333, dtype=torch.float64),
- tensor(280.1133, dtype=torch.float64),
- tensor(280.0934, dtype=torch.float64),
- tensor(280.0734, dtype=torch.float64),
- tensor(280.0535, dtype=torch.float64),
- tensor(280.0336, dtype=torch.float64),
- tensor(280.0137, dtype=torch.float64),
- tensor(279.9938, dtype=torch.float64),
- tensor(279.9740, dtype=torch.float64),
- tensor(279.9541, dtype=torch.float64),
- tensor(279.9343, dtype=torch.float64),
- ...]</code></pre>
-</div>
-</div>
-<div id="0c8ee2e9" class="cell" data-execution_count="25">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>opt3.w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="25">
-<pre><code>tensor([-9.7637e-01, -3.8816e-02, -4.1513e-01, -7.2064e-02,  1.6028e-03,
-         4.1965e+00,  2.0960e+00], dtype=torch.float64)</code></pre>
-</div>
-</div>
-<div id="f7e9ebe3" class="cell" data-execution_count="26">
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>y_test_tensor</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="26">
-<pre><code>tensor([0., 0., 0., 0., 0., 0., 1., 1., 1., 0., 1., 1., 0., 1., 1., 0., 0., 0.,
-        0., 0., 1., 0., 1., 0., 0., 1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.,
-        1., 1., 0., 1., 1., 0., 0., 0., 0., 0., 1., 0., 1., 0., 0., 0., 1., 0.,
-        1., 0., 1., 0., 1., 1., 1., 1., 1., 0., 0., 0., 1., 1., 0., 1., 1., 1.,
-        1., 0., 1., 1., 1., 1., 1., 0., 0., 0., 1., 1., 0., 0., 0., 0., 1., 1.,
-        0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 1., 1., 1., 0., 0., 0., 0., 1.,
-        0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 1., 1.,
-        1., 0., 1., 0., 1., 1., 0., 1., 1., 1., 1., 0., 1., 0., 1., 1., 1.],
+<p>Inspect the weight vector:</p>
+<div id="0c8ee2e9" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>opt3.w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<pre><code>tensor([-9.1277e-01, -3.1313e-02,  1.3956e-04,  4.3116e+00,  2.3760e+00],
        dtype=torch.float64)</code></pre>
 </div>
 </div>
-<div id="728a437a" class="cell" data-execution_count="27">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>predicted <span class="op">=</span> opt3.predict(X_test_tensor)</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>predicted</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="f7e9ebe3" class="cell" data-execution_count="24">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>y_test_tensor</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="24">
+<pre><code>tensor([0., 0., 1., 0., 1., 0., 0., 1., 1., 0., 1., 0., 0., 1., 0., 1., 1., 1.,
+        0., 0., 0., 1., 1., 0., 0., 1., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0.,
+        1., 0., 1., 0., 1., 1., 0., 1., 1., 1., 1., 1., 1., 0., 1., 1., 1., 1.,
+        0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 1., 1., 1., 0., 0.,
+        0., 1., 0., 1., 1., 0., 1., 1., 1., 1., 0., 0., 0., 1., 1., 0., 1., 0.,
+        0., 0., 1., 0., 0., 0., 1., 0., 0., 0., 1., 0., 0., 0., 1., 0., 0., 0.,
+        0., 0., 1., 0., 1., 0., 0., 1., 0., 1., 0., 1., 0., 0., 0., 0., 1., 0.,
+        1., 0., 1., 1., 0., 0., 0., 0., 0., 1., 0., 0., 1., 0., 0., 1., 0., 0.,
+        0., 0., 0., 1., 1., 0., 0., 1., 0., 0., 0., 0., 1., 1., 0., 0., 0., 1.,
+        0., 0., 1., 1., 0., 1., 0., 1., 1., 1., 1., 1., 1., 0., 0., 1., 0., 1.,
+        1., 0., 1., 1., 1., 1., 0., 0., 1., 0., 1., 0., 1., 0., 0., 0., 0., 1.,
+        0., 0., 1., 0., 0., 0., 1., 1., 0., 0., 0., 1., 0., 1., 1., 0., 0.],
+       dtype=torch.float64)</code></pre>
+</div>
+</div>
+<div id="728a437a" class="cell" data-execution_count="25">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>predicted <span class="op">=</span> opt3.predict(X_test_tensor)</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>predicted</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="25">
+<pre><code>tensor([0., 0., 1., 0., 1., 1., 0., 0., 0., 0., 1., 0., 0., 1., 0., 0., 0., 1.,
+        0., 0., 0., 1., 1., 1., 0., 1., 1., 1., 1., 0., 1., 0., 0., 0., 1., 0.,
+        0., 0., 1., 0., 1., 0., 0., 0., 1., 1., 1., 1., 1., 0., 1., 1., 1., 0.,
+        0., 0., 0., 1., 1., 1., 0., 1., 0., 0., 1., 1., 1., 0., 0., 0., 0., 0.,
+        0., 1., 1., 1., 1., 1., 1., 1., 1., 1., 0., 0., 0., 0., 1., 1., 0., 0.,
+        1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 1., 0., 0., 0., 1., 0., 0., 1.,
+        0., 0., 1., 0., 1., 1., 0., 0., 1., 1., 0., 1., 0., 0., 0., 0., 1., 0.,
+        1., 0., 1., 1., 0., 0., 0., 0., 0., 1., 0., 0., 1., 0., 1., 1., 0., 0.,
+        1., 0., 0., 1., 1., 0., 0., 1., 0., 0., 1., 0., 0., 1., 0., 0., 0., 1.,
+        0., 0., 1., 0., 0., 1., 0., 1., 1., 1., 0., 1., 1., 0., 1., 1., 0., 0.,
+        1., 1., 1., 1., 1., 1., 0., 1., 1., 0., 1., 0., 0., 0., 0., 1., 0., 1.,
+        0., 0., 1., 0., 0., 1., 0., 1., 0., 1., 0., 1., 0., 1., 1., 1., 0.])</code></pre>
+</div>
+</div>
+<p>Let’s check the accuracy:</p>
+<div id="7e22715e" class="cell" data-execution_count="26">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">#find score</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>(predicted <span class="op">==</span> y_test_tensor).<span class="bu">sum</span>()<span class="op">/</span><span class="bu">len</span>(predicted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<pre><code>tensor(0.7767)</code></pre>
+</div>
+</div>
+<p>Pretty good! It would be hard to visualize a 5d vector like this on a plot as we did with the synthetic data, but the score on our data is pretty good. Let’s look at the confusion matrix too:</p>
+<div id="42c08be0" class="cell" data-execution_count="27">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co">#find confusion matrix</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> confusion_matrix(y_test_tensor, predicted)</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>C</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="27">
-<pre><code>tensor([0., 0., 1., 0., 0., 1., 1., 0., 0., 0., 0., 1., 0., 1., 1., 0., 0., 0.,
-        0., 0., 1., 0., 1., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0.,
-        1., 1., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 1., 1., 0., 0., 1., 0.,
-        1., 0., 1., 0., 1., 0., 1., 1., 1., 1., 0., 0., 0., 1., 0., 0., 1., 1.,
-        1., 0., 1., 0., 1., 1., 1., 0., 0., 1., 1., 1., 0., 0., 0., 0., 1., 1.,
-        0., 1., 0., 0., 1., 0., 0., 0., 0., 1., 0., 1., 0., 1., 0., 0., 0., 1.,
-        0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1.,
-        1., 0., 0., 0., 1., 1., 0., 1., 1., 1., 1., 0., 0., 0., 1., 1., 1.])</code></pre>
+<pre><code>array([[97, 27],
+       [21, 70]])</code></pre>
 </div>
 </div>
-<div id="42c08be0" class="cell" data-execution_count="28">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.metrics <span class="im">import</span> confusion_matrix</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> confusion_matrix(y_test_tensor, predicted)</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>C</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="28">
-<pre><code>array([[71,  9],
-       [17, 46]])</code></pre>
+<p>Now, let’s make an example where alpha is too large and Newton’s method fails to converge.</p>
+<div id="ac3438d5" class="cell" data-execution_count="28">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>opt4 <span class="op">=</span> NewtonOptimizer()</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>loss_arr4 <span class="op">=</span> []</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div id="fe38375a" class="cell" data-execution_count="29">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">2500</span>):</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> opt4.loss(X_train_tensor, y_train_tensor)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>    loss_arr4.append(loss)</span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>    opt4.step(X_train_tensor, y_train_tensor, alpha <span class="op">=</span> <span class="fl">0.001</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="fe38375a" class="cell" data-execution_count="30">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>(<span class="dv">71</span><span class="op">+</span><span class="dv">46</span>)<span class="op">/</span><span class="dv">143</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="a0cf2017" class="cell" data-execution_count="30">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>loss_arr4</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="30">
-<pre><code>0.8181818181818182</code></pre>
+<pre><code>[tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ tensor(nan, dtype=torch.float64),
+ ...]</code></pre>
+</div>
+</div>
+<div id="d43df17e" class="cell" data-execution_count="31">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>plt.plot(torch.arange(<span class="dv">1</span>, <span class="bu">len</span>(loss_arr4)<span class="op">+</span><span class="dv">1</span>), loss_arr4, color <span class="op">=</span> <span class="st">"black"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-32-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="f37e06dc" class="cell" data-execution_count="32">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>plt.plot(loss_arr4[<span class="dv">10</span>:])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-33-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="553388dc" class="cell" data-execution_count="33">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>predicted <span class="op">=</span> opt4.predict(X_test_tensor)</span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>(predicted <span class="op">==</span> y_test_tensor).<span class="bu">sum</span>()<span class="op">/</span><span class="bu">len</span>(predicted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="33">
+<pre><code>tensor(0.4279)</code></pre>
+</div>
+</div>
+<div id="4138ddd1" class="cell" data-execution_count="34">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>adam <span class="op">=</span> AdamOptimizer()</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>adam_loss <span class="op">=</span> []</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="d7322c3d" class="cell" data-execution_count="35">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>loss <span class="op">=</span> math.inf</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>adam_start_time <span class="op">=</span> time.time()</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="co"># for t in range(1, 2000):</span></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> loss <span class="op">&gt;=</span> <span class="dv">240</span> <span class="kw">or</span> torch.isnan(loss):</span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> adam.loss(X_train_tensor, y_train_tensor)</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    adam_loss.append(loss)</span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>    adam.step(X_train_tensor, y_train_tensor, <span class="dv">10</span>, <span class="fl">0.001</span>, <span class="fl">0.9</span>, <span class="fl">0.999</span>, t)</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>adam_end_time <span class="op">=</span> time.time()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="a032e64d" class="cell" data-execution_count="36">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>plt.plot(adam_loss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-37-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="6a7aface" class="cell" data-execution_count="37">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>predicted <span class="op">=</span> adam.predict(X_test_tensor)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>(predicted <span class="op">==</span> y_test_tensor).<span class="bu">sum</span>()<span class="op">/</span><span class="bu">len</span>(predicted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="37">
+<pre><code>tensor(0.7581)</code></pre>
+</div>
+</div>
+<div id="401d233d" class="cell" data-execution_count="38">
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>adam_time <span class="op">=</span> adam_end_time <span class="op">-</span> adam_start_time</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>newton_time <span class="op">=</span> newton_end_time <span class="op">-</span> newton_start_time</span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Newton Time: </span><span class="sc">{</span>newton_time<span class="sc">}</span><span class="ch">\n</span><span class="ss">Adam Time: </span><span class="sc">{</span>adam_time<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Newton Time: 1.046778917312622
+Adam Time: 0.8173220157623291</code></pre>
+</div>
+</div>
+<div id="0018dee5" class="cell" data-execution_count="39">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>sgd <span class="op">=</span> StandardSGD()</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>sgd_loss <span class="op">=</span> []</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="6153c2a8" class="cell" data-execution_count="40">
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">200</span>):</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> sgd.loss(X_train_tensor, y_train_tensor)</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>    sgd_loss.append(loss)</span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>    sgd.step(X_train_tensor, y_train_tensor, <span class="dv">10</span>, <span class="fl">0.0001</span>, t)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="b63a1664" class="cell" data-execution_count="41">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>plt.plot(sgd_loss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-42-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
 </div>
 </div>
 

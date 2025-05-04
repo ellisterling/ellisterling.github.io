@@ -25,12 +25,12 @@ class LogisticRegression(LinearModel):
     def sigmoid(self, z):
         return 1 / (1 + torch.exp(-z))
     
-    def hessian(self, X):
+    def hessian(self, X, y):
         scores = self.score(X)
         probs = self.sigmoid(scores)
         diagonal = torch.diag(probs * (1 - probs))
-        return X.T @ diagonal @ X
-
+        return (X.T @ diagonal @ X)/len(y)
+    
     def grad(self, X, y):
         scores = self.score(X)
         probs = self.sigmoid(scores)
@@ -46,9 +46,9 @@ class GradientDescentOptimizer(LogisticRegression):
         gradient = self.grad(X, y)
         if self.prev_w is None:
             self.prev_w = self.w.clone()
-        temp_w = self.w.clone()
-        self.w = self.w - alpha*gradient + beta*(self.w - self.prev_w)
-        self.prev_w = temp_w
+        w_next = self.w - alpha*gradient + beta*(self.w - self.prev_w)
+        self.prev_w = self.w
+        self.w = w_next
 
 class NewtonOptimizer(LogisticRegression):
     def __init__(self):
@@ -57,59 +57,58 @@ class NewtonOptimizer(LogisticRegression):
 
     def step(self, X, y, alpha):
         gradient = self.grad(X, y)
-        hessian_matrix = self.hessian(X)
+        hessian_matrix = self.hessian(X, y)
         if self.prev_w is None:
             self.prev_w = self.w.clone()
-        temp_w = self.w.clone()
-        self.w = self.w - alpha * torch.linalg.solve(hessian_matrix, gradient)
-        self.prev_w = temp_w
+        w_next = self.w - alpha * torch.pinverse(hessian_matrix) @ gradient
+        self.prev_w = self.w
+        self.w = w_next
 
 class AdamOptimizer(LogisticRegression):
     def __init__(self):
         LogisticRegression.__init__(self)
+        self.prev_w = self.w
+        self.m = 0
+        self.prev_m = 0
+        self.v = 0
+        self.prev_v = 0
 
-    def step(self, X, y, batch_size, alpha, beta_1, beta_2, w_0=None):
+    def step(self, X, y, batch_size, alpha, beta_1, beta_2, t, w_0=None):
         if w_0 == None:
             w_0 = torch.rand((X.size()[1]))
-            pass
+        
+        # take random selection of {batch_size} indices from x.
+        i = torch.randint(0, len(y), (batch_size,))
+        grad = self.grad(X[i], y[i])
 
-'''
-Stochastic Gradient Descent
+        # get first and second moment estimates
+        m_next = beta_1*self.prev_m + (1 - beta_1)*grad
+        v_next = beta_2*self.prev_v + (1 - beta_2)*grad*grad
+        self.prev_m = self.m
+        self.m = m_next
+        self.prev_v = self.v
+        self.v = v_next
 
-def mse(x, y, w):
-    return ((w[1]*x + w[0] - y)**2).mean()
+        # adjust m and v for possible bias -- because they start at 0 we don't want them to be biased towards that
+        e = 1*10**(-8) # to make sure no division by 0 happens
+        m_hat = self.m/(1 - beta_1**t)
+        v_hat = self.v/(1 - beta_2**t)
 
-def learning_schedule(t): 
-    return 10/(t + 10)
+        # Update w
+        w_next = self.w - alpha * (m_hat/(torch.sqrt(v_hat)+e))
+        self.prev_w = self.w
+        self.w = w_next
 
-batch_size = 10
-
-# initialize training loop
-w = torch.tensor([0.0, 0.0], requires_grad=True)
-losses = []
-minibatch_losses = []
-
-for t in range(1, 1000):
-    # choose a random batch of indices
-    i = torch.randint(0, x.shape[0], (batch_size,))
-
-    # compute the loss
-    minibatch_loss = mse(x[i], y[i], w)
-
-    # record the minibatchloss
-    minibatch_losses.append(minibatch_loss.item())
-
-    # full loss : only for viz, not part of algorithm
-    losses.append(mse(x, y, w).item())
-
-    # compute the gradient
-    minibatch_loss.backward()
-
-    # update the weights
-    # the with statement is boilerplate that tells torch not to keep track of the gradient for the operation of updating w
-    with torch.no_grad():
-        w -= learning_schedule(t)*w.grad
-
-    # zero the gradient
-    w.grad.zero_()
-'''
+class StandardSGD(LogisticRegression):
+    def __init__(self):
+        LogisticRegression.__init__(self)
+        self.prev_w = self.w
+    
+    def learning_schedule(self, t):
+        return 10/(t + 10)
+    
+    def step(self, X, y, batch_size, alpha, t):
+        i = torch.randint(0, len(y), (batch_size,))
+        grad = self.grad(X[i], y[i])
+        with torch.no_grad():
+            self.w -= self.learning_schedule(t)*grad
