@@ -90,17 +90,3 @@ class AdamOptimizer(LogisticRegression):
 
         # Update w
         self.w = self.w - alpha * (m_hat/(torch.sqrt(v_hat)+e))
-
-class StandardSGD(LogisticRegression):
-    def __init__(self):
-        LogisticRegression.__init__(self)
-        self.prev_w = self.w
-    
-    def learning_schedule(self, t):
-        return 10/(t + 10)
-    
-    def step(self, X, y, batch_size, alpha, t):
-        i = torch.randint(0, len(y), (batch_size,))
-        grad = self.grad(X[i], y[i])
-        with torch.no_grad():
-            self.w -= self.learning_schedule(t)*grad
