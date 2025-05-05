@@ -5,4 +5,4 @@
 *.ipynb_checkpoints
 psam_p26.csv
 mountains_vs_beaches_preferences.csv
-data/*
+posts/newton/data/*
