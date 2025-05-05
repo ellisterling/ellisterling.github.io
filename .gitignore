@@ -1,7 +1,8 @@
-.quarto
+.*
 *__pycache__*
 *.code-workspace
 /.quarto/
 *.ipynb_checkpoints
 psam_p26.csv
 mountains_vs_beaches_preferences.csv
+data/*

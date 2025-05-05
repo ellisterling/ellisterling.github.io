@@ -60,7 +60,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -121,6 +121,9 @@ background-image: url(../../img/landscape.png);
 background-size: cover;
       }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -211,7 +214,7 @@ background-size: cover;
 
 <section id="abstract" class="level3">
 <h3 class="anchored" data-anchor-id="abstract"><strong>Abstract</strong></h3>
-<div id="cell-2" class="cell" data-execution_count="4">
+<div id="cell-2" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> folktables <span class="im">import</span> ACSDataSource, ACSEmployment, BasicProblem, adult_filter</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -224,83 +227,325 @@ background-size: cover;
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>acs_data <span class="op">=</span> data_source.get_data(states<span class="op">=</span>[STATE], download<span class="op">=</span><span class="va">True</span>)</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>acs_data.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">RT</th>
+<th data-quarto-table-cell-role="th">SERIALNO</th>
+<th data-quarto-table-cell-role="th">DIVISION</th>
+<th data-quarto-table-cell-role="th">SPORDER</th>
+<th data-quarto-table-cell-role="th">PUMA</th>
+<th data-quarto-table-cell-role="th">REGION</th>
+<th data-quarto-table-cell-role="th">ST</th>
+<th data-quarto-table-cell-role="th">ADJINC</th>
+<th data-quarto-table-cell-role="th">PWGTP</th>
+<th data-quarto-table-cell-role="th">AGEP</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">PWGTP71</th>
+<th data-quarto-table-cell-role="th">PWGTP72</th>
+<th data-quarto-table-cell-role="th">PWGTP73</th>
+<th data-quarto-table-cell-role="th">PWGTP74</th>
+<th data-quarto-table-cell-role="th">PWGTP75</th>
+<th data-quarto-table-cell-role="th">PWGTP76</th>
+<th data-quarto-table-cell-role="th">PWGTP77</th>
+<th data-quarto-table-cell-role="th">PWGTP78</th>
+<th data-quarto-table-cell-role="th">PWGTP79</th>
+<th data-quarto-table-cell-role="th">PWGTP80</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>P</td>
+<td>2018GQ0000064</td>
+<td>3</td>
+<td>1</td>
+<td>2907</td>
+<td>2</td>
+<td>26</td>
+<td>1013097</td>
+<td>8</td>
+<td>60</td>
+<td>...</td>
+<td>9</td>
+<td>0</td>
+<td>12</td>
+<td>9</td>
+<td>11</td>
+<td>9</td>
+<td>0</td>
+<td>9</td>
+<td>10</td>
+<td>12</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>P</td>
+<td>2018GQ0000154</td>
+<td>3</td>
+<td>1</td>
+<td>1200</td>
+<td>2</td>
+<td>26</td>
+<td>1013097</td>
+<td>92</td>
+<td>20</td>
+<td>...</td>
+<td>92</td>
+<td>91</td>
+<td>93</td>
+<td>95</td>
+<td>93</td>
+<td>173</td>
+<td>91</td>
+<td>15</td>
+<td>172</td>
+<td>172</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>P</td>
+<td>2018GQ0000158</td>
+<td>3</td>
+<td>1</td>
+<td>2903</td>
+<td>2</td>
+<td>26</td>
+<td>1013097</td>
+<td>26</td>
+<td>54</td>
+<td>...</td>
+<td>26</td>
+<td>52</td>
+<td>3</td>
+<td>25</td>
+<td>25</td>
+<td>28</td>
+<td>28</td>
+<td>50</td>
+<td>51</td>
+<td>25</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>P</td>
+<td>2018GQ0000174</td>
+<td>3</td>
+<td>1</td>
+<td>1801</td>
+<td>2</td>
+<td>26</td>
+<td>1013097</td>
+<td>86</td>
+<td>20</td>
+<td>...</td>
+<td>85</td>
+<td>12</td>
+<td>87</td>
+<td>12</td>
+<td>87</td>
+<td>85</td>
+<td>157</td>
+<td>86</td>
+<td>86</td>
+<td>86</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>P</td>
+<td>2018GQ0000212</td>
+<td>3</td>
+<td>1</td>
+<td>2600</td>
+<td>2</td>
+<td>26</td>
+<td>1013097</td>
+<td>99</td>
+<td>33</td>
+<td>...</td>
+<td>98</td>
+<td>96</td>
+<td>98</td>
+<td>95</td>
+<td>174</td>
+<td>175</td>
+<td>96</td>
+<td>95</td>
+<td>179</td>
+<td>97</td>
+</tr>
+</tbody>
+</table>
+
+<p>5 rows × 286 columns</p>
+</div>
+</div>
+</div>
+<div id="cell-3" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>possible_features<span class="op">=</span>[<span class="st">'AGEP'</span>, <span class="st">'SCHL'</span>, <span class="st">'MAR'</span>, <span class="st">'RELP'</span>, <span class="st">'DIS'</span>, <span class="st">'ESP'</span>, <span class="st">'CIT'</span>, <span class="st">'MIG'</span>, <span class="st">'MIL'</span>, <span class="st">'ANC'</span>, <span class="st">'NATIVITY'</span>, <span class="st">'DEAR'</span>, <span class="st">'DEYE'</span>, <span class="st">'DREM'</span>, <span class="st">'SEX'</span>, <span class="st">'RAC1P'</span>, <span class="st">'ESR'</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>acs_data[possible_features].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">AGEP</th>
+<th data-quarto-table-cell-role="th">SCHL</th>
+<th data-quarto-table-cell-role="th">MAR</th>
+<th data-quarto-table-cell-role="th">RELP</th>
+<th data-quarto-table-cell-role="th">DIS</th>
+<th data-quarto-table-cell-role="th">ESP</th>
+<th data-quarto-table-cell-role="th">CIT</th>
+<th data-quarto-table-cell-role="th">MIG</th>
+<th data-quarto-table-cell-role="th">MIL</th>
+<th data-quarto-table-cell-role="th">ANC</th>
+<th data-quarto-table-cell-role="th">NATIVITY</th>
+<th data-quarto-table-cell-role="th">DEAR</th>
+<th data-quarto-table-cell-role="th">DEYE</th>
+<th data-quarto-table-cell-role="th">DREM</th>
+<th data-quarto-table-cell-role="th">SEX</th>
+<th data-quarto-table-cell-role="th">RAC1P</th>
+<th data-quarto-table-cell-role="th">ESR</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>60</td>
+<td>15.0</td>
+<td>5</td>
+<td>17</td>
+<td>1</td>
+<td>NaN</td>
+<td>1</td>
+<td>1.0</td>
+<td>4.0</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>1.0</td>
+<td>1</td>
+<td>2</td>
+<td>6.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>20</td>
+<td>19.0</td>
+<td>5</td>
+<td>17</td>
+<td>2</td>
+<td>NaN</td>
+<td>1</td>
+<td>1.0</td>
+<td>4.0</td>
+<td>2</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>2.0</td>
+<td>2</td>
+<td>1</td>
+<td>6.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>54</td>
+<td>18.0</td>
+<td>3</td>
+<td>16</td>
+<td>1</td>
+<td>NaN</td>
+<td>1</td>
+<td>1.0</td>
+<td>4.0</td>
+<td>4</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>1.0</td>
+<td>1</td>
+<td>1</td>
+<td>6.0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>20</td>
+<td>18.0</td>
+<td>5</td>
+<td>17</td>
+<td>2</td>
+<td>NaN</td>
+<td>1</td>
+<td>1.0</td>
+<td>4.0</td>
+<td>4</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>2.0</td>
+<td>1</td>
+<td>1</td>
+<td>6.0</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>33</td>
+<td>18.0</td>
+<td>5</td>
+<td>16</td>
+<td>2</td>
+<td>NaN</td>
+<td>1</td>
+<td>3.0</td>
+<td>4.0</td>
+<td>2</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>2.0</td>
+<td>1</td>
+<td>1</td>
+<td>6.0</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="cell-4" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>features_to_use <span class="op">=</span> [f <span class="cf">for</span> f <span class="kw">in</span> possible_features <span class="cf">if</span> f <span class="kw">not</span> <span class="kw">in</span> [<span class="st">"ESR"</span>, <span class="st">"RAC1P"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-5" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>EmploymentProblem <span class="op">=</span> BasicProblem(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    features<span class="op">=</span>features_to_use,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    target<span class="op">=</span><span class="st">'ESR'</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    target_transform<span class="op">=</span><span class="kw">lambda</span> x: x <span class="op">==</span> <span class="dv">1</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    group<span class="op">=</span><span class="st">'RAC1P'</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    preprocess<span class="op">=</span><span class="kw">lambda</span> x: x,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    postprocess<span class="op">=</span><span class="kw">lambda</span> x: np.nan_to_num(x, <span class="op">-</span><span class="dv">1</span>),</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>features, label, group <span class="op">=</span> EmploymentProblem.df_to_numpy(acs_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="cell-6" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> obj <span class="kw">in</span> [features, label, group]:</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(obj.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Downloading data for 2018 1-Year person survey for MI...
-
-data/2018/1-Year/csv_pmi.zip may be corrupted. Please try deleting it and rerunning this command.
-
-Exception:  HTTPSConnectionPool(host='www2.census.gov', port=443): Max retries exceeded with url: /programs-surveys/acs/data/pums/2018/1-Year/csv_pmi.zip (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: unable to get local issuer certificate (_ssl.c:1006)')))</code></pre>
+<pre><code>(99419, 15)
+(99419,)
+(99419,)</code></pre>
 </div>
-<div class="cell-output cell-output-error">
-<div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">FileNotFoundError</span>                         Traceback (most recent call last)
-<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[4]</span><span class="ansi-green-fg">, line 10</span>
-<span class="ansi-green-fg">      4</span> STATE = <span class="ansi-yellow-fg">"</span><span class="ansi-yellow-fg">MI</span><span class="ansi-yellow-fg">"</span>
-<span class="ansi-green-fg">      6</span> data_source = ACSDataSource(survey_year=<span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">2018</span><span class="ansi-yellow-fg">'</span>, 
-<span class="ansi-green-fg">      7</span>                             horizon=<span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">1-Year</span><span class="ansi-yellow-fg">'</span>, 
-<span class="ansi-green-fg">      8</span>                             survey=<span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">person</span><span class="ansi-yellow-fg">'</span>)
-<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">10</span> acs_data = data_source.get_data(states=[STATE], download=<span style="font-weight:bold;color:rgb(0,135,0)">True</span>)
-<span class="ansi-green-fg">     12</span> acs_data.head()
-
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/anaconda3/envs/csci0451/lib/python3.11/site-packages/folktables/acs.py:32</span>, in <span class="ansi-cyan-fg">ACSDataSource.get_data</span><span class="ansi-blue-fg">(self, states, density, random_seed, join_household, download)</span>
-<span class="ansi-green-fg">     30</span> <span style="font-weight:bold;color:rgb(0,135,0)">def</span><span style="color:rgb(188,188,188)"> </span><span class="ansi-blue-fg">get_data</span>(<span style="color:rgb(0,135,0)">self</span>, states=<span style="font-weight:bold;color:rgb(0,135,0)">None</span>, density=<span class="ansi-green-fg">1.0</span>, random_seed=<span class="ansi-green-fg">0</span>, join_household=<span style="font-weight:bold;color:rgb(0,135,0)">False</span>, download=<span style="font-weight:bold;color:rgb(0,135,0)">False</span>):
-<span class="ansi-green-fg">     31</span> <span style="color:rgb(188,188,188)">    </span><span style="font-style:italic" class="ansi-yellow-fg">"""Get data from given list of states, density, and random seed. Optionally add household features."""</span>
-<span class="ansi-green-fg">---&gt; </span><span class="ansi-green-fg">32</span>     data = load_acs(root_dir=<span style="color:rgb(0,135,0)">self</span>._root_dir,
-<span class="ansi-green-fg">     33</span>                     year=<span style="color:rgb(0,135,0)">self</span>._survey_year,
-<span class="ansi-green-fg">     34</span>                     states=states,
-<span class="ansi-green-fg">     35</span>                     horizon=<span style="color:rgb(0,135,0)">self</span>._horizon,
-<span class="ansi-green-fg">     36</span>                     survey=<span style="color:rgb(0,135,0)">self</span>._survey,
-<span class="ansi-green-fg">     37</span>                     density=density,
-<span class="ansi-green-fg">     38</span>                     random_seed=random_seed,
-<span class="ansi-green-fg">     39</span>                     download=download)
-<span class="ansi-green-fg">     40</span>     <span style="font-weight:bold;color:rgb(0,135,0)">if</span> join_household:
-<span class="ansi-green-fg">     41</span>         orig_len = <span style="color:rgb(0,135,0)">len</span>(data)
-
-<span class="ansi-cyan-fg">File </span><span class="ansi-green-fg">~/anaconda3/envs/csci0451/lib/python3.11/site-packages/folktables/load_acs.py:120</span>, in <span class="ansi-cyan-fg">load_acs</span><span class="ansi-blue-fg">(root_dir, states, year, horizon, survey, density, random_seed, serial_filter_list, download)</span>
-<span class="ansi-green-fg">    116</span> first = <span style="font-weight:bold;color:rgb(0,135,0)">True</span>
-<span class="ansi-green-fg">    118</span> <span style="font-weight:bold;color:rgb(0,135,0)">for</span> file_name <span style="font-weight:bold;color:rgb(175,0,255)">in</span> file_names:
-<span class="ansi-green-fg">--&gt; </span><span class="ansi-green-fg">120</span>     <span style="font-weight:bold;color:rgb(0,135,0)">with</span> <span style="color:rgb(0,135,0)">open</span>(file_name, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">r</span><span class="ansi-yellow-fg">'</span>) <span style="font-weight:bold;color:rgb(0,135,0)">as</span> f:
-<span class="ansi-green-fg">    122</span>         <span style="font-weight:bold;color:rgb(0,135,0)">if</span> first:
-<span class="ansi-green-fg">    123</span>             sample.write(<span style="color:rgb(0,135,0)">next</span>(f))
-
-<span class="ansi-red-fg">FileNotFoundError</span>: [Errno 2] No such file or directory: 'data/2018/1-Year/psam_p26.csv'</pre>
-</div>
-</div>
-</div>
-<div id="cell-3" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>possible_features<span class="op">=</span>[<span class="st">'AGEP'</span>, <span class="st">'SCHL'</span>, <span class="st">'MAR'</span>, <span class="st">'RELP'</span>, <span class="st">'DIS'</span>, <span class="st">'ESP'</span>, <span class="st">'CIT'</span>, <span class="st">'MIG'</span>, <span class="st">'MIL'</span>, <span class="st">'ANC'</span>, <span class="st">'NATIVITY'</span>, <span class="st">'DEAR'</span>, <span class="st">'DEYE'</span>, <span class="st">'DREM'</span>, <span class="st">'SEX'</span>, <span class="st">'RAC1P'</span>, <span class="st">'ESR'</span>]</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>acs_data[possible_features].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-error">
-<div class="ansi-escaped-output">
-<pre><span class="ansi-red-fg">---------------------------------------------------------------------------</span>
-<span class="ansi-red-fg">NameError</span>                                 Traceback (most recent call last)
-<span class="ansi-cyan-fg">Cell</span><span class="ansi-cyan-fg"> </span><span class="ansi-green-fg">In[1]</span><span class="ansi-green-fg">, line 2</span>
-<span class="ansi-green-fg">      1</span> possible_features=[<span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">AGEP</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">SCHL</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">MAR</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">RELP</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">DIS</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">ESP</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">CIT</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">MIG</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">MIL</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">ANC</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">NATIVITY</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">DEAR</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">DEYE</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">DREM</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">SEX</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">RAC1P</span><span class="ansi-yellow-fg">'</span>, <span class="ansi-yellow-fg">'</span><span class="ansi-yellow-fg">ESR</span><span class="ansi-yellow-fg">'</span>]
-<span class="ansi-green-fg">----&gt; </span><span class="ansi-green-fg">2</span> acs_data[possible_features].head()
-
-<span class="ansi-red-fg">NameError</span>: name 'acs_data' is not defined</pre>
-</div>
-</div>
-</div>
-<div id="cell-4" class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>features_to_use <span class="op">=</span> [f <span class="cf">for</span> f <span class="kw">in</span> possible_features <span class="cf">if</span> f <span class="kw">not</span> <span class="kw">in</span> [<span class="st">"ESR"</span>, <span class="st">"RAC1P"</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="cell-5" class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>EmploymentProblem <span class="op">=</span> BasicProblem(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    features<span class="op">=</span>features_to_use,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    target<span class="op">=</span><span class="st">'ESR'</span>,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    target_transform<span class="op">=</span><span class="kw">lambda</span> x: x <span class="op">==</span> <span class="dv">1</span>,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    group<span class="op">=</span><span class="st">'RAC1P'</span>,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    preprocess<span class="op">=</span><span class="kw">lambda</span> x: x,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>    postprocess<span class="op">=</span><span class="kw">lambda</span> x: np.nan_to_num(x, <span class="op">-</span><span class="dv">1</span>),</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>features, label, group <span class="op">=</span> EmploymentProblem.df_to_numpy(acs_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="cell-6" class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> obj <span class="kw">in</span> [features, label, group]:</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="bu">print</span>(obj.shape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div id="cell-7" class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
