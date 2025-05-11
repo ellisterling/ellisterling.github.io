@@ -349,12 +349,12 @@ background-size: cover;
 <pre><code>tensor(0.7600)</code></pre>
 </div>
 </div>
-<p>But only 70% accuracy on the testing data! Because of the amount of features that we put in our dataset, the model tried to hard to be accuracte for all of them, and when we gave it another dataset the accuracy dropped dramatically. Moral of the story: don’t have more features than data points!</p>
+<p>But only 76% accuracy on the testing data! Because of the amount of features that we put in our dataset, the model tried to hard to be accuracte for all of them, and when we gave it another dataset the accuracy dropped dramatically. Moral of the story: don’t have more features than data points!</p>
 </section>
 <section id="empirical-data" class="level4">
 <h4 class="anchored" data-anchor-id="empirical-data">Empirical Data</h4>
 <p>Now for the fun part! We are going to load in a real-world binary classification dataset and test our model performance on it.</p>
-<p>The data we will be using is a dataset of breast cancer patients and a control group who had not been diagnosed with breast cancer. It contains features such as age, BMI, and glucose levels. I obtained this data from the <a href="https://archive.ics.uci.edu/dataset/451/breast+cancer+coimbra">UC Irvine Machine Learning Repository</a>, but the data was originally collected and used for a machine learning study by <a href="https://doi.org/10.1186/s12885-017-3877-1">Patricio et al.&nbsp;(2018)</a>.</p>
+<p>The data we will be using is a dataset of breast cancer patients and a control group who had not been diagnosed with breast cancer. It contains features such as age, BMI, and glucose levels. I obtained this data from the <a href="https://www.kaggle.com/datasets/shahriar26s/anemia-detection-dataset/data">Kaggle</a>. It was collected by Chittagong and Cox’s Bazar Medical College Hospital in Bangladesh. The %red, %blue, and %green fields represent the average pixel percentages from images of patients conjunctiva (the inside of their eyelid).</p>
 <p>First, let’s process the data and split it into training, testing, and validation datasets.</p>
 <div id="b74dfa34" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"./data/anemia_dataset.csv"</span>)</span>
@@ -595,7 +595,7 @@ background-size: cover;
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">"Anaemic"</span>]</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> y.replace({<span class="st">"Yes"</span>: <span class="dv">1</span>, <span class="st">"No"</span>: <span class="dv">0</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>/var/folders/sy/9tmrg3gx65vf4qjw8jl8ytsc0000gn/T/ipykernel_78472/975647156.py:3: FutureWarning: Downcasting behavior in `replace` is deprecated and will be removed in a future version. To retain the old behavior, explicitly call `result.infer_objects(copy=False)`. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+<pre><code>/var/folders/sy/9tmrg3gx65vf4qjw8jl8ytsc0000gn/T/ipykernel_98315/975647156.py:3: FutureWarning: Downcasting behavior in `replace` is deprecated and will be removed in a future version. To retain the old behavior, explicitly call `result.infer_objects(copy=False)`. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
   y = y.replace({"Yes": 1, "No": 0})</code></pre>
 </div>
 </div>
@@ -613,7 +613,8 @@ background-size: cover;
 <span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> torch.tensor(y_test.values, dtype<span class="op">=</span>torch.float32)</span>
 <span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>y_val <span class="op">=</span> torch.tensor(y_val.values, dtype<span class="op">=</span>torch.float32)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="2277606d" class="cell">
+<p>First, we’ll run our model with Vanilla Gradient Descent.</p>
+<div id="2277606d" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer()</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>loss_arr <span class="op">=</span> []</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>loss_arr_val <span class="op">=</span> []</span>
@@ -622,70 +623,74 @@ background-size: cover;
 <span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    loss_val <span class="op">=</span> opt.loss(X_val, y_val)</span>
 <span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    loss_arr.append(loss)</span>
 <span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    loss_arr_val.append(loss_val)</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    opt.step(X_train, y_train, alpha <span class="op">=</span> <span class="fl">0.003</span>, beta <span class="op">=</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    opt.step(X_train, y_train, alpha <span class="op">=</span> <span class="fl">0.001</span>, beta <span class="op">=</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="c0a393b5" class="cell" data-execution_count="19">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>loss_arr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="9504c212" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.axes()</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>ax.plot(loss_arr, label<span class="op">=</span><span class="st">"Training"</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>ax.plot(loss_arr_val, label<span class="op">=</span><span class="st">"Validation"</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Loss over Iterations for Training and Validation Data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="19">
-<pre><code>[tensor(nan),
- tensor(nan),
- tensor(nan),
- tensor(nan),
- tensor(nan),
- tensor(nan),
- tensor(nan),
- tensor(524.2529),
- tensor(204.7319),
- tensor(67.5799),
- tensor(57.1138),
- tensor(57.1009),
- tensor(55.5209),
- tensor(55.4334),
- tensor(54.5089),
- tensor(54.3825),
- tensor(53.7285),
- tensor(53.5803),
- tensor(53.0678),
- tensor(52.9067),
- tensor(52.4786),
- tensor(52.3098),
- tensor(51.9365),
- tensor(51.7630),
- tensor(51.4275),
- tensor(51.2514),
- tensor(50.9433),
- tensor(50.7658),
- tensor(50.4783),
- tensor(50.3005),
- tensor(50.0290),
- tensor(49.8514),
- tensor(49.5928),
- tensor(49.4158),
- tensor(49.1677),
- tensor(48.9917),
- tensor(48.7524),
- tensor(48.5777),
- tensor(48.3459),
- tensor(48.1727)]</code></pre>
+<pre><code>Text(0.5, 1.0, 'Loss over Iterations for Training and Validation Data')</code></pre>
 </div>
-</div>
-<div id="9504c212" class="cell" data-execution_count="20">
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.axes()</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>ax.plot(loss_arr, label<span class="op">=</span><span class="st">"Training"</span>)</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>ax.plot(loss_arr_val, label<span class="op">=</span><span class="st">"Validation"</span>)</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>ax.legend()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/cell-21-output-1.png" class="img-fluid figure-img"></p>
+<p><img src="index_files/figure-html/cell-20-output-2.png" class="img-fluid figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
+<p>We can see that it converged, but interestingly the validation loss converged to a slightly smaller value. Now, let’s try to run it with momentum.</p>
+<div id="f52f25c2" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer()</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>loss_arr <span class="op">=</span> []</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>loss_arr_val <span class="op">=</span> []</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> opt.loss(X_train, y_train)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    loss_val <span class="op">=</span> opt.loss(X_val, y_val)</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    loss_arr.append(loss)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    loss_arr_val.append(loss_val)</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    opt.step(X_train, y_train, alpha <span class="op">=</span> <span class="fl">0.002</span>, beta <span class="op">=</span> <span class="fl">0.9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="ef0d63c6" class="cell" data-execution_count="21">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.axes()</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>ax.plot(loss_arr, label<span class="op">=</span><span class="st">"Training"</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>ax.plot(loss_arr_val, label<span class="op">=</span><span class="st">"Validation"</span>)</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Loss over Iterations for Training and Validation Data with Momentum"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="21">
+<pre><code>Text(0.5, 1.0, 'Loss over Iterations for Training and Validation Data with Momentum')</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-22-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>It also converged! Now let’s check our model’s loss and accuracy on the testing data.</p>
+<div id="c2880070" class="cell" data-execution_count="22">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>opt.loss(X_test, y_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="22">
+<pre><code>tensor(0.1397)</code></pre>
+</div>
+</div>
+<div id="2c4e3bf8" class="cell" data-execution_count="23">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>predicted <span class="op">=</span> opt.predict(X_test)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>(predicted <span class="op">==</span> y_test).<span class="bu">sum</span>()<span class="op">/</span><span class="bu">len</span>(predicted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="23">
+<pre><code>tensor(1.)</code></pre>
+</div>
+</div>
+<p>We got it to converge to a very small loss, and had 100% accuracy on the testing data. This is interesting because the loss curve for the optimizer with momentum is so unexpected–it has a lot of variability and is not always decreasing. However, we were able to reach really good accuracy with this model, and our loss curves did reach convergence.</p>
 </section>
 </section>
 <section id="discussion" class="level3">
 <h3 class="anchored" data-anchor-id="discussion">Discussion</h3>
+<p>In this blog post, we implemented Logistic Regression and performed various experiments with both synthetic and real-world data. We were able to achieve 100% accuracy on both types of data, and we pushed the model to its limits by forcing overfitting. We were able to see the difference between loss curves on synthetic and real data, and we were able to see where Logistic Regression with Gradient Descent fails as a model. In general, it seems like it performs better on datasets with not a lot of features. We were able to observe how our model dramatically decreased in accuracy when we gave it more features than data points. One interesting result from our empirical data experiment is that the Vanilla Gradient Descent model converged faster than the model with momentum, but we were able to achieve faster convergence with momentum on the synthetic data. This helps to illustrate how different alpha and beta parameters are going to work better for different datasets.</p>
 <section id="references" class="level5">
 <h5 class="anchored" data-anchor-id="references">References:</h5>
 <p>Patrício, M., Pereira, J., Crisóstomo, J. et al.&nbsp;Using Resistin, glucose, age and BMI to predict the presence of breast cancer. BMC Cancer 18, 29 (2018). https://doi.org/10.1186/s12885-017-3877-1</p>
