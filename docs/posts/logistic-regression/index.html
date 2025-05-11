@@ -59,7 +59,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -120,6 +120,9 @@ background-image: url(../../img/landscape.png);
 background-size: cover;
       }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 <link rel="stylesheet" href="../../styles.css">
@@ -203,17 +206,27 @@ background-size: cover;
 
 
 
-<div id="4f8c8a0e" class="cell" data-execution_count="2">
+<section id="abstract" class="level3">
+<h3 class="anchored" data-anchor-id="abstract">Abstract</h3>
+<p>The code for my LR implementation can be found on GitHub <a href="https://github.com/ellisterling/ellisterling.github.io/blob/main/posts/logistic-regression/logistic.py">here</a>.</p>
+<p>In this blog post, we will implement Logistic Regression and run various experiments to test our implementation. Logistic Regression uses the gradient of a feature matrix to approximate the best next option for the weight vector w. We iterate through this step until the weight vector is optimal and the loss function has converged. Our initial tests will include a basic test of performance on synthetic data, a comparison of the Gradient Descent Optimizer with and without momentum, and a test in which we force overfitting of the model by increasing the features so they outnumber the number of data points. After these synthetic data experiments, we will run our model on some real-world data to see how it performs on an actual dataset.</p>
+</section>
+<section id="experiments" class="level3">
+<h3 class="anchored" data-anchor-id="experiments">Experiments</h3>
+<div id="4f8c8a0e" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>load_ext autoreload</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">%</span>autoreload <span class="dv">2</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> logistic <span class="im">import</span> LogisticRegression, GradientDescentOptimizer</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> logistic <span class="im">import</span> GradientDescentOptimizer</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="d81d030f" class="cell" data-execution_count="3">
+<div id="d81d030f" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="092d1451" class="cell" data-execution_count="4">
+<p>First, lets define the function with which we will create our synthetic data. The code for this function was taken from Prof.&nbsp;Phil Chodrow’s lecture notes.</p>
+<div id="092d1451" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> classification_data(n_points <span class="op">=</span> <span class="dv">300</span>, noise <span class="op">=</span> <span class="fl">0.2</span>, p_dims <span class="op">=</span> <span class="dv">2</span>):</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> torch.arange(n_points) <span class="op">&gt;=</span> <span class="bu">int</span>(n_points<span class="op">/</span><span class="dv">2</span>)</span>
@@ -225,19 +238,20 @@ background-size: cover;
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>X, y <span class="op">=</span> classification_data(noise <span class="op">=</span> <span class="fl">0.5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="1b6a85ea" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>LR <span class="op">=</span> LogisticRegression()</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer()</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>loss_arr <span class="op">=</span> []</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># add other stuff to e.g. keep track of the loss over time.</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> opt.loss(X, y)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    loss_arr.append(loss)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    opt.step(X, y, alpha <span class="op">=</span> <span class="fl">0.1</span>, beta <span class="op">=</span> <span class="fl">0.9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="vanilla-gradient-descent" class="level4">
+<h4 class="anchored" data-anchor-id="vanilla-gradient-descent">Vanilla Gradient Descent</h4>
+<p>Now, we will run our model on this synthetic data with beta=0, which is called Vanilla Gradient Descent. We want to see how it performs without momentum so we can compare later on.</p>
+<div id="1b6a85ea" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>loss_arr <span class="op">=</span> []</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">500</span>):</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> opt.loss(X, y)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    loss_arr.append(loss)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    opt.step(X, y, alpha <span class="op">=</span> <span class="fl">0.3</span>, beta <span class="op">=</span> <span class="fl">0.0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="c5753259" class="cell" data-execution_count="6">
+<div id="c5753259" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>plt.plot(torch.arange(<span class="dv">1</span>, <span class="bu">len</span>(loss_arr)<span class="op">+</span><span class="dv">1</span>), loss_arr, color <span class="op">=</span> <span class="st">"black"</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>plt.semilogx()</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Loss over iterations for Vanilla Gradient Descent"</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Number of gradient descent iterations"</span>, ylabel <span class="op">=</span> <span class="st">"Loss (binary cross entropy)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -247,9 +261,8 @@ background-size: cover;
 </div>
 </div>
 </div>
-<section id="implement-vanilla-gradient-descent" class="level3">
-<h3 class="anchored" data-anchor-id="implement-vanilla-gradient-descent">Implement Vanilla Gradient Descent</h3>
-<div id="e447ea17" class="cell" data-execution_count="7">
+<p>Great, we can see that our loss function has converged. Let’s plot our weight vector and see how it separates our data.</p>
+<div id="e447ea17" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_data_and_w(X, y, w):</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">8</span>, <span class="dv">6</span>))</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    plt.scatter(X[y <span class="op">==</span> <span class="dv">0</span>][:, <span class="dv">0</span>], X[y <span class="op">==</span> <span class="dv">0</span>][:, <span class="dv">1</span>], color<span class="op">=</span><span class="st">'red'</span>, label<span class="op">=</span><span class="st">'Label 0'</span>)</span>
@@ -276,8 +289,409 @@ background-size: cover;
 </div>
 </div>
 </div>
+<p>Looking good! Our vector looks visually correct. Now let’s compare with a model where we add momentum.</p>
+</section>
+<section id="gradient-descent-with-momentum" class="level4">
+<h4 class="anchored" data-anchor-id="gradient-descent-with-momentum">Gradient Descent with Momentum</h4>
+<p>Now, we want to prove that adding momentum can speed up convergence in some cases. Let’s create a new model with beta = 0.9 and run it for the same number of iterations that we ran our Vanilla Gradient Descent Model for.</p>
+<div id="c90e7831" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>opt2 <span class="op">=</span> GradientDescentOptimizer()</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>loss_arr2 <span class="op">=</span> []</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">500</span>):</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> opt2.loss(X, y)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    loss_arr2.append(loss)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    opt2.step(X, y, alpha <span class="op">=</span> <span class="fl">0.3</span>, beta <span class="op">=</span> <span class="fl">0.9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now we can plot the loss curves!</p>
+<div id="970bbf32" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.axes()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>ax.plot(torch.arange(<span class="dv">1</span>, <span class="bu">len</span>(loss_arr2)<span class="op">+</span><span class="dv">1</span>), loss_arr2, color <span class="op">=</span> <span class="st">"black"</span>, label <span class="op">=</span> <span class="st">"GD with Momentum"</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>ax.plot(torch.arange(<span class="dv">1</span>, <span class="bu">len</span>(loss_arr)<span class="op">+</span><span class="dv">1</span>), loss_arr, color <span class="op">=</span> <span class="st">"blue"</span>, label <span class="op">=</span> <span class="st">"Vanilla GD"</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">"Loss for Gradient Descent with Momentum vs Vanilla Gradient Descent"</span>)</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>ax.legend()</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>labs <span class="op">=</span> plt.gca().<span class="bu">set</span>(xlabel <span class="op">=</span> <span class="st">"Number of gradient descent iterations"</span>, ylabel <span class="op">=</span> <span class="st">"Loss (binary cross entropy)"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-9-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We can see that the model with momentum converges much faster than the model without for these choices in alpha and beta.</p>
+</section>
+<section id="forcing-overfitting" class="level4">
+<h4 class="anchored" data-anchor-id="forcing-overfitting">Forcing Overfitting</h4>
+<p>Now that we’ve confirmed that our model performs as we would expect, let’s test it on some data with too many features. We want to force overfitting in this case.</p>
+<div id="1d68017b" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>X_train, y_train <span class="op">=</span> classification_data(n_points<span class="op">=</span><span class="dv">50</span>, noise <span class="op">=</span> <span class="fl">0.5</span>, p_dims<span class="op">=</span><span class="dv">5000</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>X_test, y_test <span class="op">=</span> classification_data(n_points<span class="op">=</span><span class="dv">50</span>, noise <span class="op">=</span> <span class="fl">0.5</span>, p_dims<span class="op">=</span><span class="dv">5000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="1d37843b" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer()</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>loss_arr <span class="op">=</span> []</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">500</span>):</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    opt.step(X_train, y_train, alpha <span class="op">=</span> <span class="fl">0.3</span>, beta <span class="op">=</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We’ve ran our model, so let’s take a look at the difference between training data accuracy and testing data accuracy.</p>
+<div id="4d3e5571" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>predicted <span class="op">=</span> opt.predict(X_train)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>(predicted <span class="op">==</span> y_train).<span class="bu">sum</span>()<span class="op">/</span><span class="bu">len</span>(predicted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>tensor(1.)</code></pre>
+</div>
+</div>
+<p>We have 100% accuracy on the training data.</p>
+<div id="77cc1d2d" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>predicted_test <span class="op">=</span> opt.predict(X_test)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>(predicted_test <span class="op">==</span> y_test).<span class="bu">sum</span>()<span class="op">/</span><span class="bu">len</span>(predicted_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>tensor(0.7600)</code></pre>
+</div>
+</div>
+<p>But only 70% accuracy on the testing data! Because of the amount of features that we put in our dataset, the model tried to hard to be accuracte for all of them, and when we gave it another dataset the accuracy dropped dramatically. Moral of the story: don’t have more features than data points!</p>
+</section>
+<section id="empirical-data" class="level4">
+<h4 class="anchored" data-anchor-id="empirical-data">Empirical Data</h4>
+<p>Now for the fun part! We are going to load in a real-world binary classification dataset and test our model performance on it.</p>
+<p>The data we will be using is a dataset of breast cancer patients and a control group who had not been diagnosed with breast cancer. It contains features such as age, BMI, and glucose levels. I obtained this data from the <a href="https://archive.ics.uci.edu/dataset/451/breast+cancer+coimbra">UC Irvine Machine Learning Repository</a>, but the data was originally collected and used for a machine learning study by <a href="https://doi.org/10.1186/s12885-017-3877-1">Patricio et al.&nbsp;(2018)</a>.</p>
+<p>First, let’s process the data and split it into training, testing, and validation datasets.</p>
+<div id="b74dfa34" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(<span class="st">"./data/anemia_dataset.csv"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<div>
 
 
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Number</th>
+<th data-quarto-table-cell-role="th">Name</th>
+<th data-quarto-table-cell-role="th">%Red Pixel</th>
+<th data-quarto-table-cell-role="th">%Green pixel</th>
+<th data-quarto-table-cell-role="th">%Blue pixel</th>
+<th data-quarto-table-cell-role="th">Hb</th>
+<th data-quarto-table-cell-role="th">Anaemic</th>
+<th data-quarto-table-cell-role="th">Unnamed: 7</th>
+<th data-quarto-table-cell-role="th">Unnamed: 8</th>
+<th data-quarto-table-cell-role="th">Unnamed: 9</th>
+<th data-quarto-table-cell-role="th">Unnamed: 10</th>
+<th data-quarto-table-cell-role="th">Unnamed: 11</th>
+<th data-quarto-table-cell-role="th">Unnamed: 12</th>
+<th data-quarto-table-cell-role="th">Unnamed: 13</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>1</td>
+<td>Jafor Alam</td>
+<td>43.2555</td>
+<td>30.8421</td>
+<td>25.9025</td>
+<td>6.3</td>
+<td>Yes</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>2</td>
+<td>khadiza</td>
+<td>45.6033</td>
+<td>28.1900</td>
+<td>26.2067</td>
+<td>13.5</td>
+<td>No</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>3</td>
+<td>Lalu</td>
+<td>45.0107</td>
+<td>28.9677</td>
+<td>26.0215</td>
+<td>11.7</td>
+<td>No</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>4</td>
+<td>Mira nath</td>
+<td>44.5398</td>
+<td>28.9899</td>
+<td>26.4703</td>
+<td>13.5</td>
+<td>No</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>5</td>
+<td>monoara</td>
+<td>43.2870</td>
+<td>30.6972</td>
+<td>26.0158</td>
+<td>12.4</td>
+<td>No</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>We’ll use the features identified by Patricio et al.&nbsp;as the most pertinent features: Age, BMI, Glucose, and Resistin.</p>
+<div id="3fac47cb" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.drop([<span class="st">"Number"</span>, <span class="st">"Name"</span>, <span class="st">"Unnamed: 7"</span>, <span class="st">"Unnamed: 8"</span>, <span class="st">"Unnamed: 9"</span>, <span class="st">"Unnamed: 10"</span>, <span class="st">"Unnamed: 11"</span>, <span class="st">"Unnamed: 12"</span>, <span class="st">"Unnamed: 13"</span>], axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">%Red Pixel</th>
+<th data-quarto-table-cell-role="th">%Green pixel</th>
+<th data-quarto-table-cell-role="th">%Blue pixel</th>
+<th data-quarto-table-cell-role="th">Hb</th>
+<th data-quarto-table-cell-role="th">Anaemic</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0</td>
+<td>43.2555</td>
+<td>30.8421</td>
+<td>25.9025</td>
+<td>6.3</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1</td>
+<td>45.6033</td>
+<td>28.1900</td>
+<td>26.2067</td>
+<td>13.5</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">2</td>
+<td>45.0107</td>
+<td>28.9677</td>
+<td>26.0215</td>
+<td>11.7</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">3</td>
+<td>44.5398</td>
+<td>28.9899</td>
+<td>26.4703</td>
+<td>13.5</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">4</td>
+<td>43.2870</td>
+<td>30.6972</td>
+<td>26.0158</td>
+<td>12.4</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">99</td>
+<td>49.9999</td>
+<td>29.2860</td>
+<td>20.7141</td>
+<td>14.5</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">100</td>
+<td>42.2324</td>
+<td>30.6757</td>
+<td>27.0919</td>
+<td>6.3</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">101</td>
+<td>45.6064</td>
+<td>31.9084</td>
+<td>22.4852</td>
+<td>12.7</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">102</td>
+<td>45.2095</td>
+<td>29.2769</td>
+<td>25.5136</td>
+<td>13.4</td>
+<td>No</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">103</td>
+<td>43.5706</td>
+<td>29.8094</td>
+<td>26.6199</td>
+<td>12.2</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+
+<p>104 rows × 5 columns</p>
+</div>
+</div>
+</div>
+<div id="6bbb12e1" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>X <span class="op">=</span> df.drop(<span class="st">"Anaemic"</span>, axis<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> df[<span class="st">"Anaemic"</span>]</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> y.replace({<span class="st">"Yes"</span>: <span class="dv">1</span>, <span class="st">"No"</span>: <span class="dv">0</span>})</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>/var/folders/sy/9tmrg3gx65vf4qjw8jl8ytsc0000gn/T/ipykernel_78472/975647156.py:3: FutureWarning: Downcasting behavior in `replace` is deprecated and will be removed in a future version. To retain the old behavior, explicitly call `result.infer_objects(copy=False)`. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+  y = y.replace({"Yes": 1, "No": 0})</code></pre>
+</div>
+</div>
+<div id="1bd6304b" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> sklearn.model_selection <span class="im">import</span> train_test_split</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>X_train, X_test, y_train, y_test <span class="op">=</span> train_test_split(X, y, test_size <span class="op">=</span> <span class="fl">0.2</span>, random_state<span class="op">=</span><span class="dv">1</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>X_train, X_val, y_train, y_val <span class="op">=</span> train_test_split(X_train, y_train, test_size <span class="op">=</span> <span class="fl">0.25</span>, random_state<span class="op">=</span><span class="dv">1</span>) <span class="co"># 25% of 80 is 20, so this should create a 60/20/20 split</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="340c0cd4" class="cell" data-execution_count="17">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>X_train <span class="op">=</span> torch.from_numpy(X_train.to_numpy(dtype <span class="op">=</span> np.float32))</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>X_test <span class="op">=</span> torch.from_numpy(X_test.to_numpy(dtype <span class="op">=</span> np.float32))</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>X_val <span class="op">=</span> torch.from_numpy(X_val.to_numpy(dtype <span class="op">=</span> np.float32))</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>y_train <span class="op">=</span> torch.tensor(y_train.values, dtype<span class="op">=</span>torch.float32)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>y_test <span class="op">=</span> torch.tensor(y_test.values, dtype<span class="op">=</span>torch.float32)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>y_val <span class="op">=</span> torch.tensor(y_val.values, dtype<span class="op">=</span>torch.float32)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="2277606d" class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>opt <span class="op">=</span> GradientDescentOptimizer()</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>loss_arr <span class="op">=</span> []</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>loss_arr_val <span class="op">=</span> []</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">100</span>):</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> opt.loss(X_train, y_train)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    loss_val <span class="op">=</span> opt.loss(X_val, y_val)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    loss_arr.append(loss)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>    loss_arr_val.append(loss_val)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    opt.step(X_train, y_train, alpha <span class="op">=</span> <span class="fl">0.003</span>, beta <span class="op">=</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="c0a393b5" class="cell" data-execution_count="19">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>loss_arr</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="19">
+<pre><code>[tensor(nan),
+ tensor(nan),
+ tensor(nan),
+ tensor(nan),
+ tensor(nan),
+ tensor(nan),
+ tensor(nan),
+ tensor(524.2529),
+ tensor(204.7319),
+ tensor(67.5799),
+ tensor(57.1138),
+ tensor(57.1009),
+ tensor(55.5209),
+ tensor(55.4334),
+ tensor(54.5089),
+ tensor(54.3825),
+ tensor(53.7285),
+ tensor(53.5803),
+ tensor(53.0678),
+ tensor(52.9067),
+ tensor(52.4786),
+ tensor(52.3098),
+ tensor(51.9365),
+ tensor(51.7630),
+ tensor(51.4275),
+ tensor(51.2514),
+ tensor(50.9433),
+ tensor(50.7658),
+ tensor(50.4783),
+ tensor(50.3005),
+ tensor(50.0290),
+ tensor(49.8514),
+ tensor(49.5928),
+ tensor(49.4158),
+ tensor(49.1677),
+ tensor(48.9917),
+ tensor(48.7524),
+ tensor(48.5777),
+ tensor(48.3459),
+ tensor(48.1727)]</code></pre>
+</div>
+</div>
+<div id="9504c212" class="cell" data-execution_count="20">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> plt.axes()</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>ax.plot(loss_arr, label<span class="op">=</span><span class="st">"Training"</span>)</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>ax.plot(loss_arr_val, label<span class="op">=</span><span class="st">"Validation"</span>)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>ax.legend()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/cell-21-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="discussion" class="level3">
+<h3 class="anchored" data-anchor-id="discussion">Discussion</h3>
+<section id="references" class="level5">
+<h5 class="anchored" data-anchor-id="references">References:</h5>
+<p>Patrício, M., Pereira, J., Crisóstomo, J. et al.&nbsp;Using Resistin, glucose, age and BMI to predict the presence of breast cancer. BMC Cancer 18, 29 (2018). https://doi.org/10.1186/s12885-017-3877-1</p>
+
+
+</section>
 </section>
 
 </main> <!-- /main -->
