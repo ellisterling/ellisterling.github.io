@@ -390,6 +390,10 @@ background-size: cover;
 <section id="runtime-complexity" class="level3">
 <h3 class="anchored" data-anchor-id="runtime-complexity">Runtime Complexity</h3>
 <p>The runtime for one step of the Perceptron algorithm would be O(p), where p is the number of features in the data. It does not depend on the number of data points.</p>
+</section>
+<section id="discussion" class="level3">
+<h3 class="anchored" data-anchor-id="discussion">Discussion</h3>
+<p>In this blog post, we implemented the Perceptron algorithm. We saw how it worked very well for all linearly separable data, even data with 6 features. In the future, I’d be interested to see how real-world runtime differs if you add many more features (orders of magnitude larger), since the theoretical runtime is certainly affected by features. The model did not converge for data that was not linearly separable. This raises questions about its usefulness for real-world data, since I have almost never encountered real-world datasets that are linearly separable. A lot of the time, there is not one hyperplane that can perfectly separate the classes of data. In these cases, Perceptron could still be used, but the loss won’t converge, so an arbitrary maximum number of iterations must be chosen. This leads us to the Logistic Regression algorithm, which is implemented in another blog post, and allows us to use a model that converges on non-linearly separable data.</p>
 
 
 </section>
