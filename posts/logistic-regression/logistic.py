@@ -18,7 +18,6 @@ class LinearModel:
         if self.w is None: 
             self.w = torch.rand(X.size()[1])
         return torch.matmul(X, self.w)
-        # return X @ self.w
 
     def predict(self, X):
         '''

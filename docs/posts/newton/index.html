@@ -452,25 +452,25 @@ Name: count, dtype: int64</code></pre>
 <div id="0c8ee2e9" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>newton.w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="23">
-<pre><code>tensor([-8.4734e-01, -1.0634e-02,  2.8755e-03,  3.2690e+00,  1.4170e+00],
+<pre><code>tensor([-7.6622e-01, -3.7120e-02, -5.2964e-04,  3.1438e+00,  1.3649e+00],
        dtype=torch.float64)</code></pre>
 </div>
 </div>
 <div id="f7e9ebe3" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>y_test_tensor</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
-<pre><code>tensor([0., 1., 1., 0., 0., 0., 0., 1., 0., 0., 1., 1., 0., 1., 0., 1., 1., 0.,
-        0., 1., 0., 1., 0., 0., 0., 0., 0., 0., 1., 1., 1., 0., 0., 0., 0., 0.,
-        0., 0., 1., 0., 1., 0., 1., 0., 0., 0., 0., 1., 1., 0., 1., 1., 1., 1.,
-        1., 1., 0., 1., 1., 0., 1., 1., 0., 0., 0., 0., 1., 1., 0., 0., 0., 1.,
-        0., 1., 0., 0., 1., 0., 1., 1., 1., 1., 0., 1., 0., 1., 0., 1., 1., 0.,
-        1., 0., 1., 0., 1., 1., 1., 0., 1., 0., 0., 0., 0., 1., 0., 0., 1., 0.,
-        0., 1., 0., 1., 1., 0., 0., 0., 0., 0., 1., 1., 0., 1., 0., 1., 0., 1.,
-        0., 1., 0., 1., 1., 0., 1., 0., 0., 1., 0., 1., 1., 0., 1., 0., 0., 0.,
-        1., 0., 0., 1., 0., 0., 0., 0., 0., 1., 0., 1., 0., 0., 0., 1., 0., 0.,
-        0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 1., 0., 1., 1., 0., 0., 0.,
-        0., 0., 0., 0., 0., 0., 1., 1., 0., 1., 1., 0., 1., 0., 0., 0., 1., 1.,
-        1., 0., 1., 1., 0., 0., 0., 0., 1., 0., 1., 0., 0., 0., 0., 0., 1.],
+<pre><code>tensor([1., 1., 0., 1., 1., 1., 1., 1., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0.,
+        1., 0., 0., 1., 0., 0., 1., 0., 1., 0., 0., 1., 1., 1., 0., 0., 0., 1.,
+        1., 0., 0., 1., 1., 0., 1., 0., 0., 0., 0., 0., 1., 1., 0., 0., 0., 1.,
+        0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 1., 1., 1., 0., 1., 1., 1., 0.,
+        0., 0., 0., 0., 0., 0., 0., 1., 1., 1., 1., 0., 0., 0., 1., 0., 0., 0.,
+        0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 1., 0., 0., 1., 0., 1.,
+        0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 1., 1., 0., 1.,
+        0., 0., 1., 0., 0., 0., 0., 1., 0., 1., 1., 0., 1., 1., 1., 0., 0., 0.,
+        1., 0., 1., 0., 1., 0., 0., 1., 1., 0., 1., 0., 0., 0., 0., 1., 0., 1.,
+        0., 0., 0., 1., 1., 1., 1., 1., 1., 1., 0., 0., 1., 1., 0., 1., 0., 1.,
+        0., 1., 0., 0., 0., 1., 0., 0., 0., 0., 0., 1., 0., 1., 1., 1., 0., 1.,
+        1., 1., 0., 0., 1., 1., 0., 0., 1., 1., 1., 1., 1., 0., 0., 1., 1.],
        dtype=torch.float64)</code></pre>
 </div>
 </div>
@@ -478,18 +478,18 @@ Name: count, dtype: int64</code></pre>
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>predicted <span class="op">=</span> newton.predict(X_test_tensor)</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>predicted</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="25">
-<pre><code>tensor([1., 0., 1., 0., 0., 0., 1., 1., 0., 0., 1., 1., 0., 1., 1., 1., 1., 0.,
-        1., 1., 0., 1., 1., 0., 0., 0., 0., 0., 1., 1., 1., 0., 0., 0., 0., 0.,
-        1., 0., 0., 0., 1., 1., 0., 0., 1., 0., 0., 1., 1., 0., 1., 1., 1., 1.,
-        0., 1., 1., 1., 1., 0., 1., 1., 0., 1., 1., 0., 0., 1., 0., 0., 0., 1.,
-        0., 0., 0., 0., 0., 0., 1., 1., 0., 1., 0., 0., 1., 1., 1., 1., 1., 0.,
-        1., 0., 1., 0., 1., 0., 1., 1., 1., 1., 1., 1., 0., 1., 0., 1., 0., 0.,
-        0., 1., 0., 1., 1., 1., 1., 1., 0., 1., 1., 0., 0., 1., 0., 0., 0., 1.,
-        0., 1., 1., 1., 1., 0., 1., 0., 0., 1., 0., 1., 0., 0., 0., 0., 0., 0.,
-        1., 0., 0., 1., 0., 0., 0., 0., 1., 1., 0., 1., 0., 0., 1., 1., 0., 1.,
-        0., 0., 0., 1., 0., 1., 1., 1., 0., 0., 1., 1., 0., 0., 0., 0., 1., 0.,
-        1., 0., 0., 1., 1., 1., 1., 1., 0., 1., 1., 0., 0., 1., 0., 0., 1., 1.,
-        1., 0., 1., 0., 1., 0., 0., 1., 1., 0., 1., 1., 0., 0., 0., 0., 1.])</code></pre>
+<pre><code>tensor([1., 0., 0., 1., 0., 0., 1., 1., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0.,
+        1., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.,
+        1., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.,
+        0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 1., 1., 0., 0., 1., 0., 0., 0.,
+        0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 1., 0., 0., 0., 1., 0., 0., 0.,
+        0., 1., 0., 0., 0., 1., 0., 0., 0., 0., 0., 1., 0., 0., 1., 1., 0., 1.,
+        0., 0., 0., 1., 0., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 0., 0., 1.,
+        0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 1., 0., 1., 0., 0., 0., 0., 0.,
+        0., 0., 1., 0., 0., 0., 0., 1., 0., 0., 1., 0., 0., 0., 0., 1., 0., 0.,
+        0., 0., 0., 1., 0., 1., 0., 1., 0., 1., 0., 0., 1., 0., 0., 1., 0., 1.,
+        0., 0., 0., 0., 1., 1., 0., 0., 0., 0., 0., 1., 0., 1., 1., 1., 0., 1.,
+        0., 0., 0., 0., 0., 1., 0., 0., 1., 1., 1., 1., 1., 0., 0., 1., 0.])</code></pre>
 </div>
 </div>
 <p>Let’s check the accuracy:</p>
@@ -497,7 +497,7 @@ Name: count, dtype: int64</code></pre>
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co">#find score</span></span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>(predicted <span class="op">==</span> y_test_tensor).<span class="bu">sum</span>()<span class="op">/</span><span class="bu">len</span>(predicted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="26">
-<pre><code>tensor(0.7349)</code></pre>
+<pre><code>tensor(0.7953)</code></pre>
 </div>
 </div>
 <p>Pretty good! It would be hard to visualize a 5d vector like this on a plot as we did with the synthetic data, but the score on our data is pretty good. Let’s look at the confusion matrix too:</p>
@@ -507,12 +507,12 @@ Name: count, dtype: int64</code></pre>
 <span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>C <span class="op">=</span> confusion_matrix(y_test_tensor, predicted)</span>
 <span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>C</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="27">
-<pre><code>array([[89, 38],
-       [19, 69]])</code></pre>
+<pre><code>array([[121,   5],
+       [ 39,  50]])</code></pre>
 </div>
 </div>
 <p>We have a higher error rate for passengers who survived. Now, let’s make an example where alpha is too large and Newton’s method fails to converge.</p>
-<div id="b2a61caa" class="cell" data-execution_count="84">
+<div id="b2a61caa" class="cell" data-execution_count="28">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>gd <span class="op">=</span> GradientDescentOptimizer()</span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>gd_loss <span class="op">=</span> []</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> <span class="dv">1</span></span>
@@ -523,15 +523,15 @@ Name: count, dtype: int64</code></pre>
 <span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>    gd_loss.append(loss)</span>
 <span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>    gd.step(X_train_tensor, y_train_tensor, <span class="fl">0.0001</span>, <span class="fl">0.9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="fe38375a" class="cell" data-execution_count="85">
+<div id="fe38375a" class="cell">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>newton <span class="op">=</span> NewtonOptimizer()</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>n_loss <span class="op">=</span> []</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> t <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">500</span>):</span>
 <span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>    loss <span class="op">=</span> newton.loss(X_train_tensor, y_train_tensor)</span>
 <span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>    n_loss.append(loss)</span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    newton.step(X_train_tensor, y_train_tensor, alpha <span class="op">=</span> <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    newton.step(X_train_tensor, y_train_tensor, alpha <span class="op">=</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="ec04bfd2" class="cell" data-execution_count="88">
+<div id="ec04bfd2" class="cell" data-execution_count="80">
 <div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>plt.plot(n_loss)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -542,11 +542,11 @@ Name: count, dtype: int64</code></pre>
 </div>
 </div>
 <p>We can see from the plot that the model didn’t converge, and does not look to be on the course to converge.</p>
-<div id="553388dc" class="cell" data-execution_count="31">
+<div id="553388dc" class="cell" data-execution_count="63">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>predicted <span class="op">=</span> newton.predict(X_test_tensor)</span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>(predicted <span class="op">==</span> y_test_tensor).<span class="bu">sum</span>()<span class="op">/</span><span class="bu">len</span>(predicted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="31">
-<pre><code>tensor(0.5953)</code></pre>
+<div class="cell-output cell-output-display" data-execution_count="63">
+<pre><code>tensor(0.6093)</code></pre>
 </div>
 </div>
 <p>We can also see that it didn’t reach the level of accuracy it was reaching before.</p>
@@ -588,7 +588,7 @@ Name: count, dtype: int64</code></pre>
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>predicted <span class="op">=</span> adam.predict(X_test_tensor)</span>
 <span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>(predicted <span class="op">==</span> y_test_tensor).<span class="bu">sum</span>()<span class="op">/</span><span class="bu">len</span>(predicted)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="35">
-<pre><code>tensor(0.7442)</code></pre>
+<pre><code>tensor(0.7674)</code></pre>
 </div>
 </div>
 <p>Great! We are able to obtain similar accuracy by predicting with Adam to Newton. Now, let’s compare against standard minibatch stochastic gradient descent. I did this by selecting a batch in the loop, and using my standard gradient descent model from the Logistic Regression blog post.</p>
@@ -690,8 +690,8 @@ Name: count, dtype: int64</code></pre>
 <span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>newton_time <span class="op">=</span> newton_end_time <span class="op">-</span> newton_start_time</span>
 <span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Newton Time: </span><span class="sc">{</span>newton_time<span class="sc">}</span><span class="ch">\n</span><span class="ss">Adam Time: </span><span class="sc">{</span>adam_time<span class="sc">}</span><span class="ss">"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Newton Time: 0.06209516525268555
-Adam Time: 0.045562028884887695</code></pre>
+<pre><code>Newton Time: 0.06674981117248535
+Adam Time: 0.046050071716308594</code></pre>
 </div>
 </div>
 <p>Generally, it seems that Adam is faster, even though it takes more iterations to reach convergence. However, depending on the train-test split and the initial choice of w, Newton may perform better. Both Adam and Newton perform best with small step sizes.</p>
