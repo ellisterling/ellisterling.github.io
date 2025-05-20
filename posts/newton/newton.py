@@ -19,6 +19,7 @@ class LogisticRegression(LinearModel):
     def loss(self, X, y):
         scores = self.score(X)
         probs = self.sigmoid(scores)
+        probs = torch.clamp(probs, 1e-7, 1 - 1e-7)
         loss = -y * torch.log(probs) - (1 - y) * torch.log((1 - probs))
         return loss.sum()
     
@@ -45,11 +46,14 @@ class GradientDescentOptimizer(LogisticRegression):
         self.w = w_next
 
 class NewtonOptimizer(LogisticRegression):
+    def __init__(self):
+        LogisticRegression.__init__(self)
+
     def hessian(self, X, y):
         scores = self.score(X)
         probs = self.sigmoid(scores)
         diagonal = torch.diag(probs * (1 - probs))
-        return (X.T @ diagonal @ X)/len(y)
+        return (X.T @ diagonal @ X)/len(y) + 1e-5 * torch.eye(X.size(1))
     
     def step(self, X, y, alpha):
         gradient = self.grad(X, y)
